@@ -7,6 +7,7 @@ In this repository you will find example codes and tests codes we have developed
 
 1. [IR Remote Controller](#ir-remote-controller)
 2. [Temperature](#temperature)
+3. [Arduino power consumption](#arduino-power-consumption)
 
 ### IR Remote Controller
 
@@ -31,4 +32,23 @@ In this repository you will find example codes and tests codes we have developed
  
 ### Temperature
 
-Not implemented yet.
+We had the [*DHT11*](https://www.mouser.com/datasheet/2/758/DHT11-Technical-Data-Sheet-Translated-Version-1143054.pdf) sensor lying around and played with a couple lines of code to see how it worked. Not surprisingly it worked just fine and we didn't have much trouble at all. 
+
+The only important thing to bare in mind is that the DHT11 is a digital sensor and needs to have a "settling time" between two consecutives reads (5 seconds aproximately). 
+
+We follow [this tutorial](https://www.youtube.com/watch?v=hlmSF9xNARU&ab_channel=Programarfacil) as a guide.
+
+
+### Arduino power consumption
+
+Yesterday we devoted our time to investigate how to make the Arduino consume less current than the regular 20-70 [mA] (we measure that current in *idle* mode and the measurments correspond to Arduino Uno and Mega with ATMega2560 respectively).
+
+We measure the current consumption using a multimeter in series with the power source. The cables were connected trhough one board to the 5V and GND pins of the board being measured in order to conect the multimeter properly.
+
+The first thing we noticed was that using the *Vin* pin rather than the *5V* pin inmediately brought down the current from 20 [mA] to 12 [mA] as explained in [this video](https://www.youtube.com/watch?v=usKaGRzwIMI). Afterward we use the clock divider in *CLKPR* register to slow down the clock. We saw significant changes in current consumption when the clock was up to 4 [MHz], with slower clocks our measurements did not show significant changes (it remained near 5 [mA]). 
+
+Finally we investigated about the [*LowPower library*](https://www.arduino.cc/reference/en/libraries/low-power/). It worked pretty well and the *powerDown* method brought the board's current down from 20 [mA] to roughly 6 [mA] (using the 16 [MHz] clock). However we did not see significant changes using this library while having a slower clock.
+
+To conclude, both methods are useful in a variety of applications where the board is powered using a battery.
+
+**NOTE**: We didn't desolder the always-on LED that shows the board is ON, by doing this you could bring down power consumption by a couple of mA (see the video linked before for more information). 
