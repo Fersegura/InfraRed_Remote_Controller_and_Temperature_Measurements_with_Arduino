@@ -51,4 +51,4 @@ Finally we investigated about the [*LowPower library*](https://www.arduino.cc/re
 
 To conclude, both methods are useful in a variety of applications where the board is powered using a battery.
 
-**NOTE**: We didn't desolder the always-on LED that shows the board is ON, by doing this you could bring down power consumption by a couple of mA (see the video linked before for more information). 
+**NOTE**: We didn't desolder the always-on LED that shows the board is ON, by doing this you could bring down power consumption by a couple of mA (see the video linked before for more information).  Also the voltage was 5 [V] the whole time, you also can use less input voltage to drop the current consumption.
