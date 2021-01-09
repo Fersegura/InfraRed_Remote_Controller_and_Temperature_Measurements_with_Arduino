@@ -45,6 +45,7 @@
                 $row = mysqli_fetch_array($resultado);
             }
         }
+       
         
         mysqli_close($conectar);
     }
