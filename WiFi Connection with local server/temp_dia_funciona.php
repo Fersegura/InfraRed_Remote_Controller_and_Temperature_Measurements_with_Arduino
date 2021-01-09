@@ -24,7 +24,6 @@
     {
         require_once('conectar.php');
         $conectar = conectar();     // Me conecto a la BD
-        $datos="" ;
         $ano = date("Y");
 
         // Esto funciona en tanto y cuanto tenga los datos cargados de esta forma en la BD, si no hay que hacer un query distinto
@@ -40,21 +39,14 @@
         {
             $datos.="[".($row[0]*1000).",".($row[1])."],";
             // // // Se realiza el formato que requiere highcharts (los corchetes y eso)
-            // echo "[";
-            // echo $row[0]*1000;  // Se multiplica para transformarlo a miliseg. xq el grafico de highcharts lo usa asi
-            // echo ",";
-            // echo $row[1];
-            // echo "],";
             
             for ($x=0; $x<$intervalo; $x++)
             {
                 $row = mysqli_fetch_array($resultado);
             }
         }
-       
         
         mysqli_close($conectar);
-        return $datos;
     }
 
 ?>
