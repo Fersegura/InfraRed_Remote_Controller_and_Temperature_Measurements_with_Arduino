@@ -8,6 +8,7 @@ In this repository you will find example codes and tests codes we have developed
 1. [IR Remote Controller](#ir-remote-controller)
 2. [Temperature](#temperature)
 3. [Arduino power consumption](#arduino-power-consumption)
+4. [WiFi and local server connection](#wifi-and-local-server-connection)
 
 ### IR Remote Controller
 
@@ -52,3 +53,16 @@ Finally we investigated about the [*LowPower library*](https://www.arduino.cc/re
 To conclude, both methods are useful in a variety of applications where the board is powered using a battery.
 
 **NOTE**: We didn't desolder the always-on LED that shows the board is ON, by doing this you could bring down power consumption by a couple of mA (see the video linked before for more information).  Also the voltage was 5 [V] the whole time, you also can use less input voltage to drop the current consumption.
+
+
+### WiFi and local server connection
+
+Soon we realized that it would be interesting if the data from the sensors could be stored in a database.
+
+To achive this, we studied a bit of *MySQL* and got familiarized with *XAMPP* and *PHPMyAdmin*, a GUI to quiclky deploy a database with all the information we needed
+
+Furthermore, we learned some *php*, *javascript* and *HTML* to develop a way to comunicate with the database and to display the information in a graph (we intend to use the templates available at [*highcharts*](https://www.highcharts.com/)).
+
+We followed the tutorials from [***Ioticos***](https://www.youtube.com/playlist?list=PLVnDMG-Nwzxl_5B65dlJsTKOa8xoIKqBm) that explain how to use *XAMPP* and *PHPMyAdmin*, how to record data into the database from an *ESP8266* and how to display the information.
+
+
