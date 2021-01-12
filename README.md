@@ -9,6 +9,7 @@ In this repository you will find example codes and tests codes we have developed
 2. [Temperature](#temperature)
 3. [Arduino power consumption](#arduino-power-consumption)
 4. [WiFi and local server connection](#wifi-and-local-server-connection)
+5. [Displaying results on a website](#displaying-results-on-a-website)
 
 ### IR Remote Controller
 
@@ -64,5 +65,14 @@ To achive this, we studied a bit of *MySQL* and got familiarized with *XAMPP* an
 Furthermore, we learned some *php*, *javascript* and *HTML* to develop a way to comunicate with the database and to display the information in a graph (we intend to use the templates available at [*highcharts*](https://www.highcharts.com/)).
 
 We followed the tutorials from [***Ioticos***](https://www.youtube.com/playlist?list=PLVnDMG-Nwzxl_5B65dlJsTKOa8xoIKqBm) that explain how to use *XAMPP* and *PHPMyAdmin*, how to record data into the database from an *ESP8266* and how to display the information.
+
+
+### Displaying results on a website
+
+Ultimately we expected to showcase different graphs and images in an organized and nice-looking website. We had to learn how to upload our local server to an interntet hosting service. For this we decided to go with [*000webhost*](https://000webhost.com/) beacause it provided website and database hosting services.
+
+You can check our [site](https://irresponsible-toolb.000webhostapp.com/index.html). It only displays an illustrative graph of what we expect to have in the future with the *Arduino* sensors information. The template of the site you can find it in [*colorlib*](https://colorlib.com/wp/free-bootstrap-admin-dashboard-templates/). We used the *AdminLTE 3*.
+
+However, we are currently struggling wiht how to show the database information in a graph in the website and we are looking for solutions and coming up with interesting ideas.
 
 
