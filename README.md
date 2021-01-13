@@ -1,5 +1,6 @@
 # InfraRed Remote Controller and Temperature Measurements with Arduino
 ---
+***DISCLAIMER***: This is sort of a blog where we show what we did in the time between December 2020 and February of 2021. It is not a full project nor a specific application development. We are only sharing interesting stuff we studied and what troubles we faced while doing so.
 
 In this repository you will find example codes and tests codes we have developed in this 2020-2021 summer project.
 
