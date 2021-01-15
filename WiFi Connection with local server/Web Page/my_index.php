@@ -206,30 +206,15 @@
                     </ul>
                 </li><!-- /.graficos -->
 
-                <!-- Botones -->
+                <!-- Enviar datos -->
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="nav-icon fas fa-sign-out-alt"></i>
-                        <p>
-                            Enviar datos
-                            <i class="fas fa-angle-left right"></i>
-                        </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item">
-                            <a href="pages/UI/my_buttons.php" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Botones</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="pages/UI/sliders.html" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Sliders</p>
-                            </a>
-                        </li>
-                    </ul>
-                </li><!-- ./botones -->
+                  <a href="pages/UI/my_buttons.php" class="nav-link">
+                    <i class="nav-icon fas fa-sign-out-alt"></i>
+                    <p>
+                        Enviar datos
+                    </p>
+                  </a>
+                </li><!-- ./enviar-datos -->
 
                 <!-- Datos Recibidos -->
                 <li class="nav-item">
@@ -247,10 +232,6 @@
         </div><!-- /.sidebar -->
 
       </aside>
-
-
-
-
 
       
       <!-- Content Wrapper. Contains page content -->
@@ -551,9 +532,6 @@
 
       </div>
       <!-- /.content-wrapper -->
-
-
-
 
       
 
