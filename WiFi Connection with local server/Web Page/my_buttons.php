@@ -195,7 +195,7 @@
                 <div class="container-fluid">
                     <div class="row">
 
-                        <div class="col-md-12">
+                        <div class="col-lg-12 col-6">
                             <div class="card card-primary card-outline">
                                 <div class="card-header">
                                     <h3 class="card-title" style="font-size: 20px;">
@@ -379,7 +379,7 @@
                             </div><!-- /.card -->
                         </div><!-- /.col -->
 
-                        <div class="col-md-12">
+                        <div class="col-lg-12 col-6">
                             <div class="card card-success card-outline">
                                 <div class="card-header">
                                     <h3 class="card-title" style="font-size: 20px;">
@@ -426,7 +426,7 @@
                                     <table class='table' style='font-size: 20px;'>
                                         <thead>
                                             <tr>
-                                            <th>Enviar valores</th>	
+                                            <th>Envie valores ingresando el numero</th>	
                                             </tr>
                                         </thead>
                                         
@@ -447,7 +447,7 @@
                                                         <input type='text' name='value' style='width: 120px;' value=<?php echo $current_num_1; ?>  size='15' >
                                                         <input type='hidden' name='unit' style='width: 120px;' value=<?php echo $unit_id; ?> >
                                                         <input type='hidden' name='column' style='width: 120px;' value=<?php echo $column6; ?> >
-                                                        <input type= 'submit' name= 'change_but' style='width: 120px; text-align:center;' value='enviar'>
+                                                        <input type= 'submit' class="btn btn-block btn-success" name= 'change_but' style='width: 120px; text-align:center; margin-top: 5%' value='enviar'>                                                
                                                     </form>
                                                 </td>
                                             
@@ -458,7 +458,7 @@
                                                         <input type='text' name='value' style='width: 120px;' value=<?php echo $current_num_2; ?>  size='15' >
                                                         <input type='hidden' name='unit' style='width: 120px;' value=<?php echo $unit_id; ?> >
                                                         <input type='hidden' name='column' style='width: 120px;' value=<?php echo $column7; ?> >
-                                                        <input type= 'submit' name= 'change_but' style='width: 120px; text-align:center;' value='enviar'>
+                                                        <input type= 'submit' class="btn btn-block btn-success" name= 'change_but' style='width: 120px; text-align:center; margin-top: 5%' value='enviar'>
                                                     </form>
                                                 </td>
                                                 <td>
@@ -466,7 +466,7 @@
                                                         <input type='text' name='value' style='width: 120px;' value=<?php echo $current_num_3; ?>  size='15' >
                                                         <input type='hidden' name='unit' style='width: 120px;' value=<?php echo $unit_id; ?> >
                                                         <input type='hidden' name='column' style='width: 120px;' value=<?php echo $column8; ?> >
-                                                        <input type= 'submit' name= 'change_but' style='width: 120px; text-align:center;' value='enviar'>
+                                                        <input type= 'submit' class="btn btn-block btn-success" name= 'change_but' style='width: 120px; text-align:center; margin-top: 5%' value='enviar'>
                                                     </form>
                                                 </td>
                                                 <td>
@@ -474,7 +474,7 @@
                                                         <input type='text' name='value' style='width: 120px;' value=<?php echo $current_num_4; ?>  size='15' >
                                                         <input type='hidden' name='unit' style='width: 120px;' value=<?php echo $unit_id; ?> >
                                                         <input type='hidden' name='column' style='width: 120px;' value=<?php echo $column9; ?> >
-                                                        <input type= 'submit' name= 'change_but' style='width: 120px; text-align:center;' value='enviar'>
+                                                        <input type= 'submit' class="btn btn-block btn-success" name= 'change_but' style='width: 120px; text-align:center; margin-top: 5%' value='enviar'>
                                                     </form>
                                                 </td>
                                                 <td>
@@ -482,16 +482,10 @@
                                                         <input type='text' name='value' style='width: 120px;' value=<?php echo $current_num_5; ?>  size='15' >
                                                         <input type='hidden' name='unit' style='width: 120px;' value=<?php echo $unit_id; ?> >
                                                         <input type='hidden' name='column' style='width: 120px;' value=<?php echo $column10; ?> >
-                                                        <input type= 'submit' name= 'change_but' style='width: 120px; text-align:center;' value='enviar'>
+                                                        <input type= 'submit' class="btn btn-block btn-success" name= 'change_but' style='width: 120px; text-align:center; margin-top: 5%;' value='enviar'>
                                                     </form>
                                                 </td>
                                                 
-
-
-
-
-
-
                                             </tr>
                                         </tbody>
                                     </table><!-- ./tabla-enviar-valores-->
@@ -500,7 +494,7 @@
                             </div><!-- /.card -->
                         </div><!-- /.col -->
 
-                        <div class="col-md-12">
+                        <div class="col-lg-12 col-6">
                             <div class="card card-warning card-outline">
                                 <div class="card-header">
                                     <h3 class="card-title" style="font-size: 20px;">
