@@ -74,6 +74,5 @@ Ultimately we expected to showcase different graphs and images in an organized a
 
 You can check our [site](https://irresponsible-toolb.000webhostapp.com/index.html). It only displays an illustrative graph of what we expect to have in the future with the *Arduino* sensors information. The template of the site you can find it in [*colorlib*](https://colorlib.com/wp/free-bootstrap-admin-dashboard-templates/). We used the *AdminLTE 3*.
 
-However, we are currently struggling wiht how to show the database information in a graph in the website and we are looking for solutions and coming up with interesting ideas.
-
+Recently we managed to fetch information from the DB, and integrated the *ioticos* tutorial with the [*ELECTRONOOBS*](https://www.youtube.com/watch?v=dMSCVWquXhs&t=759s) tutorial and material. The result is prety satisfactory for what we were expecting. The files are not uploaded to the hosting service yet, but you can check them out in the <code>./WiFi Connection with local server/Web Page/</code> directory of this repository.
 
