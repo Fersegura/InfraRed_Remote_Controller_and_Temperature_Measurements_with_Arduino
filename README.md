@@ -72,7 +72,7 @@ We followed the tutorials from [***Ioticos***](https://www.youtube.com/playlist?
 
 Ultimately we expected to showcase different graphs and images in an organized and nice-looking website. We had to learn how to upload our local server to an interntet hosting service. For this we decided to go with [*000webhost*](https://000webhost.com/) beacause it provided website and database hosting services.
 
-You can check our [site](https://irresponsible-toolb.000webhostapp.com/index.html). It only displays an illustrative graph of what we expect to have in the future with the *Arduino* sensors information. The template of the site you can find it in [*colorlib*](https://colorlib.com/wp/free-bootstrap-admin-dashboard-templates/). We used the *AdminLTE 3*.
+You can check our [site](https://irresponsible-toolb.000webhostapp.com/my_index.php). It only displays an illustrative graph of what we expect to have in the future with the *Arduino* sensors information. The template of the site you can find it in [*colorlib*](https://colorlib.com/wp/free-bootstrap-admin-dashboard-templates/). We used the *AdminLTE 3*.
 
 Recently we managed to fetch information from the DB, and integrated the *ioticos* tutorial with the [*ELECTRONOOBS*](https://www.youtube.com/watch?v=dMSCVWquXhs&t=759s) tutorial and material. The result is prety satisfactory for what we were expecting. The files are not uploaded to the hosting service yet, but you can check them out in the <code>./WiFi Connection with local server/Web Page/</code> directory of this repository.
 
