@@ -5,7 +5,7 @@
 
     // LO PRIMERO QUE HAGO ES CONECTARME A LA BD
 
-    include("D:\\xampp\\htdocs\\mis_pruebas\\php\\database_connect.php"); //We include the database_connect.php which has the data for the connection to the database
+    include("../../php/database_connect.php"); //We include the database_connect.php which has the data for the connection to the database
 
     // Check the connection
     if (mysqli_connect_errno()) {
@@ -54,7 +54,7 @@
             <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
           </li>
           <li class="nav-item d-none d-sm-inline-block">
-            <a href="../my_index.php" class="nav-link">Inicio</a>
+            <a href="../index.php" class="nav-link">Inicio</a>
           </li>
           <li class="nav-item d-none d-sm-inline-block">
             <a href="#" class="nav-link">Contacto</a>
@@ -126,7 +126,7 @@
                 </a>
                 <ul class="nav nav-treeview">
                   <li class="nav-item">
-                    <a href="../my_index.php" class="nav-link active">
+                    <a href="../index.php" class="nav-link active">
                       <i class="far fa-circle nav-icon"></i>
                       <p>Pantalla de inicio</p>
                     </a>
@@ -194,7 +194,7 @@
                     </div><!-- /.col -->
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="../my_index.php">Inicio</a></li>
+                        <li class="breadcrumb-item"><a href="../index.php">Inicio</a></li>
                         <li class="breadcrumb-item active">Panel de datos recibidos</li>
                         </ol>
                     </div><!-- /.col -->
@@ -228,7 +228,7 @@
                                     <!-- Aca entra el codigo .php que hace fetching a la BD -->
                                     <?php
                                         //Again, we grab the table out of the database, name is ESPtable2 in this case
-                                        $result = mysqli_query($con,"SELECT * FROM `esptable2`");//table select
+                                        $result = mysqli_query($con,"SELECT * FROM `ESPtable2`");//table select
 
                                         //loop through the table and print the data into the table
                                         while($row = mysqli_fetch_array($result)) {
@@ -330,7 +330,7 @@
                                     <!-- Aca entra el codigo .php que hace fetching a la BD -->
                                     <?php
                                         //Again, we grab the table out of the database, name is ESPtable2 in this case
-                                        $result = mysqli_query($con,"SELECT * FROM `esptable2`");//table select
+                                        $result = mysqli_query($con,"SELECT * FROM `ESPtable2`");//table select
 
                                         // Por el momento, como no hay mas de un dispositivo no hace falta el ciclo while
                                         $row = mysqli_fetch_array($result);

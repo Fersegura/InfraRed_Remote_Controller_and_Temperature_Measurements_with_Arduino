@@ -2,7 +2,7 @@
   //This line will make the page auto-refresh each 15 seconds
   $page = $_SERVER['PHP_SELF'];
   $sec = "15";
-  include("D:\\xampp\\htdocs\\mis_pruebas\\php\\database_connect.php"); //We include the database_connect.php which has the data for the connection to the database
+  include("../../../php/database_connect.php"); //We include the database_connect.php which has the data for the connection to the database
 
   // Check the connection
   if (mysqli_connect_errno()) {
@@ -18,7 +18,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!--//I've used bootstrap for the tables, so I inport the CSS files for taht as well...-->
     <meta http-equiv="refresh" content="<?php echo $sec?>;URL='<?php echo $page?>'">	
-    <title>Graficos Prueba NOOBIX</title>
+    <title>Graficos / Temperatura</title>
 
     <!-- Google Font: Source Sans Pro -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
@@ -45,7 +45,7 @@
             <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
           </li>
           <li class="nav-item d-none d-sm-inline-block">
-            <a href="../../my_index.php" class="nav-link">Inicio</a>
+            <a href="../../index.php" class="nav-link">Inicio</a>
           </li>
           <li class="nav-item d-none d-sm-inline-block">
             <a href="#" class="nav-link">Contacto</a>
@@ -117,7 +117,7 @@
                       </a>
                       <ul class="nav nav-treeview">
                           <li class="nav-item">
-                              <a href="../../my_index.php" class="nav-link active">
+                              <a href="../../index.php" class="nav-link active">
                                   <i class="far fa-circle nav-icon"></i>
                                   <p>Pantalla de inicio</p>
                               </a>
@@ -181,7 +181,7 @@
               </div>
               <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
-                  <li class="breadcrumb-item"><a href="../../my_index.php">Inicio</a></li>
+                  <li class="breadcrumb-item"><a href="../../index.php">Inicio</a></li>
                   <li class="breadcrumb-item active">Temperatura</li>
                 </ol>
               </div>
@@ -193,7 +193,7 @@
         <section class="content">
           <div class="container-fluid">
             <div class="row">
-              <div class="col-md-6">
+              <div class="col-md-12">
                 <!-- Line CHART -->
                 <div class="card card-primary">
                   <div class="card-header">
@@ -215,35 +215,6 @@
                   </div><!-- /.card-body -->
                 </div><!-- /.card -->
               </div><!-- /.col (LEFT) -->
-              
-              <div class="col-md-6">
-                <div class="card card-primary">
-                    <div class="card-header">
-                      <h3 class="card-title">Temperatura</h3>
-
-                      <div class="card-tools">
-                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                          <i class="fas fa-minus"></i>
-                        </button>
-                        <button type="button" class="btn btn-tool" data-card-widget="remove">
-                          <i class="fas fa-times"></i>
-                        </button>
-                      </div>
-                    </div>
-                    <div class="card-body">
-                      <figure class="highcharts-figure">
-                        <div id="container"></div>
-                        <p class="highcharts-description">
-                            Este texto demuestra la posibilidad de escribir un <b>epigrafe</b> de foto
-                            totalmente editable.
-                        </p>
-                      </figure>
-
-
-                    </div><!-- /.card-body -->
-                  </div><!-- /.card -->
-
-              </div><!-- /.col (RIGHT) -->
 
             </div><!-- /.row -->
           </div><!-- /.container-fluid -->
@@ -310,23 +281,23 @@
               data                : [
 
                                       <?php 
-                                        require_once('D:\\xampp\\htdocs\\mis_pruebas\\php\\func_temp.php');
-                                        temperatura_diaria("","0","","",$con);
-                                        
+                                        require_once('../../../php/func_temp.php');
+                                        temperatura_diaria("","0","","","temperatura",$con);
                                       ?>
                                     ]
-            },
-            {
-              label               : 'Electronics',
-              backgroundColor     : 'rgba(210, 214, 222, 1)',
-              borderColor         : 'rgba(210, 214, 222, 1)',
-              pointRadius         : false,
-              pointColor          : 'rgba(210, 214, 222, 1)',
-              pointStrokeColor    : '#c1c7d1',
-              pointHighlightFill  : '#fff',
-              pointHighlightStroke: 'rgba(220,220,220,1)',
-              data                : [65, 59, 800, 81, 56, 55, 400]
-            },
+            }
+            // ,
+            // {
+            //   label               : 'Electronics',
+            //   backgroundColor     : 'rgba(210, 214, 222, 1)',
+            //   borderColor         : 'rgba(210, 214, 222, 1)',
+            //   pointRadius         : false,
+            //   pointColor          : 'rgba(210, 214, 222, 1)',
+            //   pointStrokeColor    : '#c1c7d1',
+            //   pointHighlightFill  : '#fff',
+            //   pointHighlightStroke: 'rgba(220,220,220,1)',
+            //   data                : [65, 59, 800, 81, 56, 55, 400]
+            // },
           ]
         }
 
@@ -353,7 +324,8 @@
         // This will get the first returned node in the jQuery collection.
         // Las siguientes lineas hacen que sea un grafico de lineas en vez de area.
         areaChartData.datasets[0].fill = false;
-        areaChartData.datasets[1].fill = false;
+        // Para tener dos lineas descomentar la de abajo
+        // areaChartData.datasets[1].fill = false;
         new Chart(areaChartCanvas, {
           type: 'line',
           data: areaChartData,

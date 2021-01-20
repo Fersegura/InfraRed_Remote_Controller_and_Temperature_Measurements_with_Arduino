@@ -1,6 +1,6 @@
 <?php
   // LO PRIMERO QUE HAGO ES CONECTARME A LA BD  
-  include("D:\\xampp\\htdocs\\mis_pruebas\\php\\database_connect.php"); //We include the database_connect.php which has the data for the connection to the database
+  include("../../../php/database_connect.php"); //We include the database_connect.php which has the data for the connection to the database
 
   // Check the connection
   if (mysqli_connect_errno()) {
@@ -45,7 +45,7 @@
                         <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
                     </li>
                     <li class="nav-item d-none d-sm-inline-block">
-                        <a href="../../my_index.php" class="nav-link">Inicio</a>
+                        <a href="../../index.php" class="nav-link">Inicio</a>
                     </li>
                     <li class="nav-item d-none d-sm-inline-block">
                         <a href="#" class="nav-link">Contacto</a>
@@ -117,7 +117,7 @@
                         </a>
                         <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="../../my_index.php" class="nav-link active">
+                            <a href="../../index.php" class="nav-link active">
                             <i class="far fa-circle nav-icon"></i>
                             <p>Pantalla de inicio</p>
                             </a>
@@ -216,7 +216,7 @@
                                     <!-- Aca entra el codigo .php que hace fetching a la BD para que los botones hagan algo -->
                                     <?php
                                         //Again, we grab the table out of the database, name is ESPtable2 in this case
-                                        $result = mysqli_query($con,"SELECT * FROM `esptable2`");//table select
+                                        $result = mysqli_query($con,"SELECT * FROM `ESPtable2`");//table select
 
                                         //loop through the table and print the data into the table
                                         while($row = mysqli_fetch_array($result)) {
@@ -317,7 +317,7 @@
                                                 <td><?php echo $unit_id;?></td> <!-- .row['id']. -->
                                                 <!-- El tamaño de los botones depende del tamaño de la letra -->
                                                 <td>
-                                                    <form action= "../../../php/my_update_values.php" method= 'post'>
+                                                    <form action= "../../my_update_values.php" method= 'post'>
                                                         <input type='hidden' name='value2' value=<?php echo $current_bool_1; ?>   size='15' >	
                                                         <input type='hidden' name='value' value=<?php echo $inv_current_bool_1; ?>  size='15' >	
                                                         <input type='hidden' name='unit' value=<?php echo $unit_id; ?> >
@@ -329,7 +329,7 @@
                                                     </form>
                                                 </td>
                                                 <td>
-                                                    <form action= "../../../php/my_update_values.php" method= 'post'>
+                                                    <form action= "../../my_update_values.php" method= 'post'>
                                                         <input type='hidden' name='value2' value=<?php echo $current_bool_2; ?>   size='15' >	
                                                         <input type='hidden' name='value' value=<?php echo $inv_current_bool_2; ?>  size='15' >	
                                                         <input type='hidden' name='unit' value=<?php echo $unit_id; ?> >
@@ -338,7 +338,7 @@
                                                     </form>
                                                 </td>
                                                 <td>
-                                                    <form action= "../../../php/my_update_values.php" method= 'post'>
+                                                    <form action= "../../my_update_values.php" method= 'post'>
                                                         <input type='hidden' name='value2' value=<?php echo $current_bool_3; ?>   size='15' >	
                                                         <input type='hidden' name='value' value=<?php echo $inv_current_bool_3; ?>  size='15' >	
                                                         <input type='hidden' name='unit' value=<?php echo $unit_id; ?> >
@@ -347,7 +347,7 @@
                                                     </form>
                                                 </td>
                                                 <td>
-                                                    <form action= "../../../php/my_update_values.php" method= 'post'>
+                                                    <form action= "../../my_update_values.php" method= 'post'>
                                                         <input type='hidden' name='value2' value=<?php echo $current_bool_4; ?>   size='15' >	
                                                         <input type='hidden' name='value' value=<?php echo $inv_current_bool_4; ?>  size='15' >	
                                                         <input type='hidden' name='unit' value=<?php echo $unit_id; ?> >
@@ -356,7 +356,7 @@
                                                     </form>
                                                 </td>
                                                 <td>
-                                                    <form action= "../../../php/my_update_values.php" method= 'post'>
+                                                    <form action= "../../my_update_values.php" method= 'post'>
                                                         <input type='hidden' name='value2' value=<?php echo $current_bool_5; ?>   size='15' >	
                                                         <input type='hidden' name='value' value=<?php echo $inv_current_bool_5; ?>  size='15' >	
                                                         <input type='hidden' name='unit' value=<?php echo $unit_id; ?> >
@@ -400,7 +400,7 @@
                                     <!-- Aca entra el codigo .php que hace fetching a la BD para que los botones hagan algo -->
                                     <?php
                                         //Again, we grab the table out of the database, name is ESPtable2 in this case
-                                        $result = mysqli_query($con,"SELECT * FROM `esptable2`");//table select
+                                        $result = mysqli_query($con,"SELECT * FROM `ESPtable2`");//table select
 
                                         //loop through the table and print the data into the table
                                         while($row = mysqli_fetch_array($result)) {
@@ -443,7 +443,7 @@
                                                 <td><?php echo $unit_id;?></td> <!-- .row['id']. -->
                                                 <!-- El tamaño de los botones depende del tamaño de la letra -->
                                                 <td>
-                                                    <form action= "../../../php/my_update_values.php" method= 'post'>
+                                                    <form action= "../../my_update_values.php" method= 'post'>
                                                         <input type='text' name='value' style='width: 120px;' value=<?php echo $current_num_1; ?>  size='15' >
                                                         <input type='hidden' name='unit' style='width: 120px;' value=<?php echo $unit_id; ?> >
                                                         <input type='hidden' name='column' style='width: 120px;' value=<?php echo $column6; ?> >
@@ -454,7 +454,7 @@
                                                     </form>
                                                 </td>
                                                 <td>
-                                                    <form action= "../../../php/my_update_values.php" method= 'post'>
+                                                    <form action= "../../my_update_values.php" method= 'post'>
                                                         <input type='text' name='value' style='width: 120px;' value=<?php echo $current_num_2; ?>  size='15' >
                                                         <input type='hidden' name='unit' style='width: 120px;' value=<?php echo $unit_id; ?> >
                                                         <input type='hidden' name='column' style='width: 120px;' value=<?php echo $column7; ?> >
@@ -462,7 +462,7 @@
                                                     </form>
                                                 </td>
                                                 <td>
-                                                    <form action= "../../../php/my_update_values.php" method= 'post'>
+                                                    <form action= "../../my_update_values.php" method= 'post'>
                                                         <input type='text' name='value' style='width: 120px;' value=<?php echo $current_num_3; ?>  size='15' >
                                                         <input type='hidden' name='unit' style='width: 120px;' value=<?php echo $unit_id; ?> >
                                                         <input type='hidden' name='column' style='width: 120px;' value=<?php echo $column8; ?> >
@@ -470,7 +470,7 @@
                                                     </form>
                                                 </td>
                                                 <td>
-                                                    <form action= "../../../php/my_update_values.php" method= 'post'>
+                                                    <form action= "../../my_update_values.php" method= 'post'>
                                                         <input type='text' name='value' style='width: 120px;' value=<?php echo $current_num_4; ?>  size='15' >
                                                         <input type='hidden' name='unit' style='width: 120px;' value=<?php echo $unit_id; ?> >
                                                         <input type='hidden' name='column' style='width: 120px;' value=<?php echo $column9; ?> >
@@ -478,7 +478,7 @@
                                                     </form>
                                                 </td>
                                                 <td>
-                                                    <form action= "../../../php/my_update_values.php" method= 'post'>
+                                                    <form action= "../../my_update_values.php" method= 'post'>
                                                         <input type='text' name='value' style='width: 120px;' value=<?php echo $current_num_5; ?>  size='15' >
                                                         <input type='hidden' name='unit' style='width: 120px;' value=<?php echo $unit_id; ?> >
                                                         <input type='hidden' name='column' style='width: 120px;' value=<?php echo $column10; ?> >
@@ -515,7 +515,7 @@
                                     <!-- Aca entra el codigo .php que hace fetching a la BD para que los botones hagan algo -->
                                     <?php
                                         //Again, we grab the table out of the database, name is ESPtable2 in this case
-                                        $result = mysqli_query($con,"SELECT * FROM `esptable2`");//table select
+                                        $result = mysqli_query($con,"SELECT * FROM `ESPtable2`");//table select
 
                                         //loop through the table and print the data into the table
                                         while($row = mysqli_fetch_array($result)) {
@@ -546,7 +546,7 @@
                                                 <td><?php echo $unit_id;?></td> <!-- .row['id']. -->
                                                 <!-- El tamaño de los botones depende del tamaño de la letra -->
                                                 <td>
-                                                    <form action= "../../../php/my_update_values.php" method= 'post'>
+                                                    <form action= "../../my_update_values.php" method= 'post'>
                                                           	<input style='width: 100%;' type='text' name='value' value=<?php echo $current_text_1; ?>  size='100'>
                                                             <input type='hidden' name='unit' value=<?php echo $unit_id; ?> >
                                                             <input type='hidden' name='column' value=<?php echo $column11; ?> >
