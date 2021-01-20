@@ -14,7 +14,7 @@ function temperatura_diaria ($serie, $intervalo, $mes, $dia,$variable, $conectar
         //                                     AND month(`fecha`) = '$mes' AND day(`fecha`) = '$dia' AND `serie`='$serie'" );
 
         // Para pruebas:
-        $resultado = mysqli_query($conectar, "SELECT * FROM `datos`" );
+        $resultado = mysqli_query($conectar, "SELECT `$variable` FROM `datos`" );
 
         
         while ($row = mysqli_fetch_array($resultado))
@@ -29,6 +29,7 @@ function temperatura_diaria ($serie, $intervalo, $mes, $dia,$variable, $conectar
             }
         }
         
-        mysqli_close($conectar);
+        // Si se quiere llamar varias veces la funcion con distintos parametros 
+        // mysqli_close($conectar);
     }
 ?>

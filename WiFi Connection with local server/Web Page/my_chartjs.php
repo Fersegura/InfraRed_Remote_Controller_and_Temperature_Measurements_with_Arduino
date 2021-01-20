@@ -193,28 +193,51 @@
         <section class="content">
           <div class="container-fluid">
             <div class="row">
-              <div class="col-md-12">
-                <!-- Line CHART -->
-                <div class="card card-primary">
-                  <div class="card-header">
-                    <h3 class="card-title">Grafico de linea</h3>
+              <div class="col-lg-12 col-6">
+                  <!-- Temperatura -->
+                  <div class="card card-primary">
+                    <div class="card-header">
+                      <h3 class="card-title">Temperatura</h3>
 
-                    <div class="card-tools">
-                      <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                        <i class="fas fa-minus"></i>
-                      </button>
-                      <button type="button" class="btn btn-tool" data-card-widget="remove">
-                        <i class="fas fa-times"></i>
-                      </button>
+                      <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                          <i class="fas fa-minus"></i>
+                        </button>
+                        <button type="button" class="btn btn-tool" data-card-widget="remove">
+                          <i class="fas fa-times"></i>
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                  <div class="card-body">
-                    <div class="chart">
-                      <canvas id="areaChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
-                    </div>
-                  </div><!-- /.card-body -->
-                </div><!-- /.card -->
+                    <div class="card-body">
+                      <div class="chart">
+                        <canvas id="Temperatura" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                      </div>
+                    </div><!-- /.card-body -->
+                  </div><!-- /.card -->
               </div><!-- /.col (LEFT) -->
+
+              <div class="col-lg-12 col-6">
+                  <!-- Humedad -->
+                  <div class="card card-success">
+                    <div class="card-header">
+                      <h3 class="card-title">Humedad</h3>
+
+                      <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                          <i class="fas fa-minus"></i>
+                        </button>
+                        <button type="button" class="btn btn-tool" data-card-widget="remove">
+                          <i class="fas fa-times"></i>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="card-body">
+                    <div class="chart">
+                      <canvas id="Humedad" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                    </div>
+                    </div><!-- /.card-body -->
+                  </div><!-- /.card -->
+                </div><!-- /.col (LEFT) -->
 
             </div><!-- /.row -->
           </div><!-- /.container-fluid -->
@@ -264,13 +287,13 @@
         //--------------
 
         // Get context with jQuery - using jQuery's .get() method.
-        var areaChartCanvas = $('#areaChart').get(0).getContext('2d')
+        var areaChartCanvas = $('#Temperatura').get(0).getContext('2d')
 
         var areaChartData = {
           labels  : ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
           datasets: [
             {
-              label               : 'Digital Goods',
+              label               : 'Temperatura',
               backgroundColor     : 'rgba(60,141,188,0.9)',
               borderColor         : 'rgba(60,141,188,0.8)',
               pointRadius          : false,
@@ -286,6 +309,7 @@
                                       ?>
                                     ]
             }
+            // Para meter otro trazo sobre el mismo grafico
             // ,
             // {
             //   label               : 'Electronics',
@@ -315,7 +339,7 @@
             }],
             yAxes: [{
               gridLines : {
-                display : false,
+                display : true,
               }
             }]
           }
@@ -335,11 +359,47 @@
         //-------------
         //- LINE CHART - Es una mentira, es el grafico de area pero sin rellenar
         //--------------
-        var lineChartCanvas = $('#lineChart').get(0).getContext('2d')
+        var lineChartCanvas = $('#Humedad').get(0).getContext('2d')
         var lineChartOptions = $.extend(true, {}, areaChartOptions)
-        var lineChartData = $.extend(true, {}, areaChartData)
+        // var lineChartData = $.extend(true, {}, areaChartData)
+        var lineChartData = {
+          labels  : ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+          datasets: [
+            {
+              label               : 'Humedad',
+              backgroundColor     : 'rgba(60,141,188,0.9)',
+              borderColor         : 'rgba(60,141,188,0.8)',
+              pointRadius          : false,
+              pointColor          : '#3b8bba',
+              pointStrokeColor    : 'rgba(60,141,188,1)',
+              pointHighlightFill  : '#fff',
+              pointHighlightStroke: 'rgba(60,141,188,1)',
+              data                : [
+
+                                      <?php 
+                                        require_once('../../../php/func_temp.php');
+                                        temperatura_diaria("","0","","","humedad",$con);
+                                      ?>
+                                    ]
+            }
+            // Para meter otro trazo sobre el mismo grafico
+            // ,
+            // {
+            //   label               : 'Electronics',
+            //   backgroundColor     : 'rgba(210, 214, 222, 1)',
+            //   borderColor         : 'rgba(210, 214, 222, 1)',
+            //   pointRadius         : false,
+            //   pointColor          : 'rgba(210, 214, 222, 1)',
+            //   pointStrokeColor    : '#c1c7d1',
+            //   pointHighlightFill  : '#fff',
+            //   pointHighlightStroke: 'rgba(220,220,220,1)',
+            //   data                : [65, 59, 800, 81, 56, 55, 400]
+            // },
+          ]
+        }
+        
         lineChartData.datasets[0].fill = false;
-        lineChartData.datasets[1].fill = false;
+        // lineChartData.datasets[1].fill = false;
         lineChartOptions.datasetFill = false
 
         var lineChart = new Chart(lineChartCanvas, {
