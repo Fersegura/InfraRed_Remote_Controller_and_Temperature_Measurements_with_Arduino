@@ -78,5 +78,5 @@ Recently we managed to fetch information from the DB thanks to the *ioticos* and
 
 The result is prety satisfactory. You can check out the files in the <code>./Pagina_web/</code> directory of this repository.
 
-***NOTE***: Please notice that in order to work, the relative paths of the files and the names must match the file location inside the page directory.
+***NOTE***: Please notice that in order to work, the relative paths of the files and the names must match the files locations inside the page directory.
 
