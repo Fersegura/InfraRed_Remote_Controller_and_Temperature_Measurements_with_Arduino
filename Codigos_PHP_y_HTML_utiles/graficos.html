@@ -1,0 +1,87 @@
+<!-- Video tutorial: https://www.youtube.com/watch?v=AKQuGtJIfHQ&list=PLVnDMG-Nwzxl_5B65dlJsTKOa8xoIKqBm&index=7 -->
+
+<!-- Incluimos las librerias que haran falta, se podrian descargar a nuestro propio servidor
+     pero para hacer pruebas alcanza y sobra con usarlas desde los servers de highcharts  -->
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/series-label.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/export-data.js"></script>
+<script src="https://code.highcharts.com/modules/accessibility.js"></script>
+<!-- Necesitamos esta libreria si o si para que ande y que no esta en la pag, highcharts -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<figure class="highcharts-figure">
+    <div id="container"></div>
+    <p class="highcharts-description">
+        Basic line chart showing trends in a dataset. This chart includes the
+        <code>series-label</code> module, which adds a label to each line for
+        enhanced readability.
+    </p>
+</figure>
+
+<script type="text/javascript">
+    Highcharts.chart('container', {
+
+    title: {
+        text: 'Tamanio del miembro de los muchachos electronicos'
+    },
+
+    subtitle: {
+        text: 'Fuente: Arial 12'
+    },
+
+    yAxis: {
+        title: {
+            text: 'Estudiantes encuestados'
+        }
+    },
+
+    xAxis: {
+        accessibility: {
+            rangeDescription: 'Largo en cm de acuerdo a la dureza'
+        }
+    },
+
+    legend: {
+        layout: 'vertical',
+        align: 'right',
+        verticalAlign: 'middle'
+    },
+
+    plotOptions: {
+        series: {
+            label: {
+                connectorAllowed: false
+            },
+            pointStart: 2010
+        }
+    },
+
+    series: [{
+        name: 'Santi R.',
+        data: [43934, 52503, 57177, 69658, 97031, 119931, 137133, 154175]
+    },{
+        name: 'El resto de los mortales',
+        data: [12908, 5948, 8105, 11248, 8989, 11816, 18274, 18111]
+    }],
+
+    responsive: {
+        rules: [{
+            condition: {
+                maxWidth: 500
+            },
+            chartOptions: {
+                legend: {
+                    layout: 'horizontal',
+                    align: 'center',
+                    verticalAlign: 'bottom'
+                }
+            }
+        }]
+    }
+
+    });
+  
+</script>
+
+
