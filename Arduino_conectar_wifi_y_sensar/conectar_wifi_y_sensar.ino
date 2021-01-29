@@ -9,13 +9,13 @@
 DHT dht(dht_dpin, DHTTYPE); // Inicializacion del sensor.
 
 // Ingresar el URL del host propio.
-#define HOST "irresponsible-toolb.000webhostapp.com"          // Ingresar el URL del host sin "http:// "  y "/" al final del URL.
+#define HOST ""          // Ingresar el URL del host sin "http:// "  y "/" al final del URL.
 
 // Variables globales:
 String temp, hum, postData;
-IPAddress local_IP(192,168,4,22);
-IPAddress gateway(192,168,4,9);
-IPAddress subnet(255,255,255,0);
+IPAddress local_IP();
+IPAddress gateway();
+IPAddress subnet();
 String ssid = "peinito";          		// SSID de la red wifi que generara el dispositivo (cuando este en modo AP).
 String pass = "0123456789";       		// Contraseña de dicha red.
 String header;	
@@ -270,7 +270,7 @@ void transmitirDatos()
 
 	// Cambiar por el url del host propio con la ubicacion del PHP que recibira los datos  
 	
-	http.begin("http://irresponsible-toolb.000webhostapp.com/dbwrite.php");	// Se conecta al host donde esta la base de datos MySQL
+	http.begin("");	// Se conecta al host donde esta la base de datos MySQL
 	http.addHeader("Content-Type", "application/x-www-form-urlencoded");	// Se especifica el content-type del header
 	
 	// Se envia un request del tipo POST al archivo PHP y se guarda la respuesta del servidor en la variable httpCode
