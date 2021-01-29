@@ -146,13 +146,13 @@
                       </a>
                       <ul class="nav nav-treeview">
                           <li class="nav-item">
-                              <a href="#" class="nav-link">
+                              <a href="./my_chartjs.php" class="nav-link">
                                   <i class="far fa-circle nav-icon"></i>
                                   <p>Informe diario</p>
                               </a>
                           </li>
                           <li class="nav-item">
-                              <a href="./mensual.php" class="nav-link">
+                              <a href="#" class="nav-link">
                                   <i class="far fa-circle nav-icon"></i>
                                   <p>Informe mensual</p>
                               </a>
@@ -199,12 +199,12 @@
           <div class="container-fluid">
             <div class="row mb-2">
               <div class="col-sm-6">
-                <h1>Temperatura y Humedad</h1>
+                <h1>Temperatura y humedad mensual</h1>
               </div>
               <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
                   <li class="breadcrumb-item"><a href="../../index.php">Inicio</a></li>
-                  <li class="breadcrumb-item active">Temperatura y humedad diarios</li>
+                  <li class="breadcrumb-item active">Temperatura y humedad mensual</li>
                 </ol>
               </div>
             </div>
@@ -219,7 +219,7 @@
                   <!-- Temperatura -->
                   <div class="card card-primary">
                     <div class="card-header">
-                      <h3 class="card-title">Temperatura</h3>
+                      <h3 class="card-title">Progreso de la temperatura en los últimos 30 días</h3>
 
                       <div class="card-tools">
                         <button type="button" class="btn btn-tool" data-card-widget="collapse">
@@ -235,7 +235,7 @@
                     <figure class="highcharts-figure">
                         <div id="temperatura"></div>
                         <p class="highcharts-description">
-                            Grafico de la temperatura sensada.
+                            Temperatura sensada en los últimos 30 días.
                         </p>
                     </figure>
 
@@ -247,7 +247,7 @@
                   <!-- Humedad -->
                   <div class="card card-success">
                     <div class="card-header">
-                      <h3 class="card-title">Humedad</h3>
+                      <h3 class="card-title">Progreso de la humedad en los últimos 30 días</h3>
 
                       <div class="card-tools">
                         <button type="button" class="btn btn-tool" data-card-widget="collapse">
@@ -263,7 +263,7 @@
                     <figure class="highcharts-figure">
                         <div id="humedad"></div>
                         <p class="highcharts-description">
-                            Grafico de la humedad sensada.
+                            Humedad sensada en los últimos 30 días.
                         </p>
                     </figure>
 
@@ -308,7 +308,7 @@
             }
         },
         title: {
-            text: 'Temperatura',
+            text: 'Temperatura mensual',
             align: 'center'
         },
         subtitle: {
@@ -327,7 +327,7 @@
                 text: 'Grados [°C]'
             },
             minorGridLineWidth: 0,
-            gridLineWidth: 0,
+            gridLineWidth: 1,
             alternateGridColor: null,
             plotBands: [{ // Falta agua
                 from: 15,
@@ -385,7 +385,7 @@
             data: [
                     <?php 
                       require_once('../../../php/func_temp.php');
-                      temperatura_diaria("","0",""," ","temperatura",$con);
+                      temperatura_diaria("","0"," "," ","temperatura",$con);    // Notar que $dia y $mes son un espacio para tener datos mensuales
                     ?>
             ]
 
@@ -406,7 +406,7 @@
             }
         },
         title: {
-            text: 'Humedad',
+            text: 'Humedad mensual',
             align: 'center'
         },
         subtitle: {
@@ -474,7 +474,7 @@
             data: [
                     <?php 
                       require_once('../../../php/func_temp.php');
-                      temperatura_diaria("","0",""," ","humedad",$con);
+                      temperatura_diaria("","0"," "," ","humedad",$con); // Notar que $dia y $mes son un espacio para tener datos mensuales
                     ?>
             ]
 

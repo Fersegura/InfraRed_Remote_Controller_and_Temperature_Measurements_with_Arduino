@@ -146,7 +146,7 @@
                       </a>
                       <ul class="nav nav-treeview">
                           <li class="nav-item">
-                              <a href="#" class="nav-link">
+                              <a href="./my_chartjs.php" class="nav-link">
                                   <i class="far fa-circle nav-icon"></i>
                                   <p>Informe diario</p>
                               </a>
@@ -158,7 +158,7 @@
                               </a>
                           </li>
                           <li class="nav-item">
-                              <a href="./historico.php" class="nav-link">
+                              <a href="#" class="nav-link">
                                   <i class="far fa-circle nav-icon"></i>
                                   <p>Informe histórico</p>
                               </a>
@@ -204,7 +204,7 @@
               <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
                   <li class="breadcrumb-item"><a href="../../index.php">Inicio</a></li>
-                  <li class="breadcrumb-item active">Temperatura y humedad diarios</li>
+                  <li class="breadcrumb-item active">Temperatura y humedad históricos</li>
                 </ol>
               </div>
             </div>
@@ -219,7 +219,7 @@
                   <!-- Temperatura -->
                   <div class="card card-primary">
                     <div class="card-header">
-                      <h3 class="card-title">Temperatura</h3>
+                      <h3 class="card-title">Temperatura histórica</h3>
 
                       <div class="card-tools">
                         <button type="button" class="btn btn-tool" data-card-widget="collapse">
@@ -247,7 +247,7 @@
                   <!-- Humedad -->
                   <div class="card card-success">
                     <div class="card-header">
-                      <h3 class="card-title">Humedad</h3>
+                      <h3 class="card-title">Humedad histórica</h3>
 
                       <div class="card-tools">
                         <button type="button" class="btn btn-tool" data-card-widget="collapse">
@@ -308,7 +308,7 @@
             }
         },
         title: {
-            text: 'Temperatura',
+            text: 'Temperatura histórica',
             align: 'center'
         },
         subtitle: {
@@ -327,7 +327,7 @@
                 text: 'Grados [°C]'
             },
             minorGridLineWidth: 0,
-            gridLineWidth: 0,
+            gridLineWidth: 1,
             alternateGridColor: null,
             plotBands: [{ // Falta agua
                 from: 15,
@@ -385,7 +385,7 @@
             data: [
                     <?php 
                       require_once('../../../php/func_temp.php');
-                      temperatura_diaria("","0",""," ","temperatura",$con);
+                      temperatura_diaria("","0","","","temperatura",$con);
                     ?>
             ]
 
@@ -406,7 +406,7 @@
             }
         },
         title: {
-            text: 'Humedad',
+            text: 'Humedad histórica',
             align: 'center'
         },
         subtitle: {
@@ -428,7 +428,7 @@
             gridLineWidth: 1,
             alternateGridColor: null,
             plotBands: [{ // Poca humedad
-                from: 0,
+                from: 15,
                 to: 65,
                 color: 'rgba(68, 170, 213, 0.1)',
                 label: {
@@ -474,7 +474,7 @@
             data: [
                     <?php 
                       require_once('../../../php/func_temp.php');
-                      temperatura_diaria("","0",""," ","humedad",$con);
+                      temperatura_diaria("","0","","","humedad",$con);
                     ?>
             ]
 

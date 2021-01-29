@@ -145,11 +145,23 @@
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                        <a href="charts/my_chartjs.php" class="nav-link">
-                            <i class="far fa-circle nav-icon"></i>
-                            <p>Temperatura</p>
-                        </a>
+                          <a href="charts/my_chartjs.php" class="nav-link">
+                              <i class="far fa-circle nav-icon"></i>
+                              <p>Informe diario</p>
+                          </a>
                         </li>
+                        <li class="nav-item">
+                              <a href="charts/mensual.php" class="nav-link">
+                                  <i class="far fa-circle nav-icon"></i>
+                                  <p>Informe mensual</p>
+                              </a>
+                          </li>
+                          <li class="nav-item">
+                              <a href="charts/historico.php" class="nav-link">
+                                  <i class="far fa-circle nav-icon"></i>
+                                  <p>Informe histórico</p>
+                              </a>
+                          </li>
                     </ul>
                 </li><!-- /.graficos -->
 
