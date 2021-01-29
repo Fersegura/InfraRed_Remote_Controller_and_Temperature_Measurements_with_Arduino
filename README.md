@@ -11,6 +11,7 @@ In this repository you will find example codes and tests codes we have developed
 3. [Arduino power consumption](#arduino-power-consumption)
 4. [WiFi and local server connection](#wifi-and-local-server-connection)
 5. [Displaying results on a website](#displaying-results-on-a-website)
+6. [Connecting ESP8266 to the internet](#connecting-esp8266-to-the-internet)
 
 ### IR Remote Controller
 
@@ -79,4 +80,18 @@ Recently we managed to fetch information from the DB thanks to the *ioticos* and
 The result is prety satisfactory. You can check out the files in the <code>./Pagina_web/</code> directory of this repository.
 
 ***NOTE***: Please notice that in order to work, the relative paths of the files and the names must match the files locations inside the page directory.
+
+
+### Connecting ESP8266 to the internet
+
+The last fundamental step to set the sensors to log information to the database via WiFi, is to connect the [*ESP8266*](https://www.espressif.com/sites/default/files/documentation/0a-esp8266ex_datasheet_en.pdf) microcontroller to the house WiFi network.
+
+The board we used is the [*Nodemcu Wifi Esp8266 Lua*](https://articulo.mercadolibre.com.ar/MLA-726650916-nodemcu-wifi-esp8266-lua-gpio-esp12f-4mb-uart-arduino-_JM#position=1&type=item&tracking_id=704c583a-3deb-4798-b04b-55097ce67604).
+
+After reading the documentation of the [*ESP8266 Arduino Core*](https://github.com/lrmoreno007/ESP8266-Arduino-Spanish) we knew that the microcontroller had two working modes: 
+
+1. Soft Access Point.
+2. Station.
+
+We decided that in order to get the most out of the ESP8266, first it had to initiate it in *AP* mode and list all the networks available so the user can choose to which connect from. After that, the microcontroller enters in *station* mode and then statrts sensing temperature and humidity data and sending it to the database. We inspired our code in [this](https://www.youtube.com/watch?t=750&v=TB7LmR9h-NA&feature=youtu.be) tutorial.
 
