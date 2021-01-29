@@ -1,8 +1,8 @@
 # InfraRed Remote Controller and Temperature Measurements with Arduino
 ---
-***DISCLAIMER***: This is sort of a blog where we show what we did in the time between December 2020 and February of 2021. It is not a full project nor a specific application development. We are only sharing interesting stuff we studied and what troubles we faced while doing so.
+***DISCLAIMER***: This is sort of a blog where we show what we did in the time between 2020 and 2021. It is not a full project nor a specific application development. We are only sharing interesting stuff we studied and what troubles we faced while doing so.
 
-In this repository you will find example codes and tests codes we have developed in this 2020-2021 summer project.
+In this repository you will find example codes and tests codes we have developed.
 
 ## Project stages & Table of Contents
 
@@ -44,7 +44,7 @@ We follow [this tutorial](https://www.youtube.com/watch?v=hlmSF9xNARU&ab_channel
 
 ### Arduino power consumption
 
-Yesterday we devoted our time to investigate how to make the Arduino consume less current than the regular 20-70 [mA] (we measure that current in *idle* mode and the measurments correspond to Arduino Uno and Mega with ATMega2560 respectively).
+We devoted some time to investigate how to make the Arduino consume less current than the regular 20-70 [mA] (we measure that current in *idle* mode and the measurments correspond to Arduino Uno and Mega with ATMega2560 respectively).
 
 We measure the current consumption using a multimeter in series with the power source. The cables were connected trhough one board to the 5V and GND pins of the board being measured in order to conect the multimeter properly.
 
@@ -72,11 +72,11 @@ We followed the tutorials from [***Ioticos***](https://www.youtube.com/playlist?
 
 Ultimately we expected to showcase different graphs and images in an organized and nice-looking website. We had to learn how to upload our local server to an interntet hosting service. For this we decided to go with [*000webhost*](https://000webhost.com/) beacause it provided website and database hosting services.
 
-You can check our [site](https://irresponsible-toolb.000webhostapp.com/index.php). It only displays an illustrative graph of what we expect to have in the future with the *Arduino* sensors information. The template of the site you can find it in [*colorlib*](https://colorlib.com/wp/free-bootstrap-admin-dashboard-templates/) (also uploaded as <code>.zip</code> in the <code>./WiFi Connection with local server/Web Page/</code> directory. We used the *AdminLTE 3*.
+You can check our [site](https://irresponsible-toolb.000webhostapp.com/index.php). It only displays an illustrative graph of what we expect to have in the future with the *Arduino* sensors information. The template of the site you can find it in [*colorlib*](https://colorlib.com/wp/free-bootstrap-admin-dashboard-templates/) (also uploaded as <code>.zip</code> in the <code>./Pagina_web/</code> directory. We used the *AdminLTE 3*.
 
 Recently we managed to fetch information from the DB thanks to the *ioticos* and [*ELECTRONOOBS*](https://www.youtube.com/watch?v=dMSCVWquXhs&t=759s) tutorials and materials.
 
-The result is prety satisfactory. You can check out the files in the <code>./WiFi Connection with local server/Web Page/</code> directory of this repository.
+The result is prety satisfactory. You can check out the files in the <code>./Pagina_web/</code> directory of this repository.
 
-***NOTE***: Please notice that in order to work, the relative paths of the files and the names must remain the same for the web page.
+***NOTE***: Please notice that in order to work, the relative paths of the files and the names must match the file location inside the page directory.
 
