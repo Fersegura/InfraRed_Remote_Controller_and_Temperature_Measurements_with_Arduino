@@ -48,7 +48,7 @@ void setup()
 	Serial.print("Estableciendo configuración Soft-AP... ");
 	Serial.println(WiFi.softAPConfig(local_IP, gateway, subnet) ? "Listo" : "Falló!");
 	Serial.print("Setting soft-AP ... ");
-	boolean result = WiFi.softAP(ssid , pass);		// PARA QUE ESTA ESTA BANDERA??????????
+	boolean result = WiFi.softAP(ssid , pass);		// PARA QUE ESTA ESTA BANDERA??????????  ESTO ESTABA ASI en realidad el Wifi.softAP hace que empiece a emitir y devuelve un boolean, y lo guarda al pedo porque desp no lo usamos en nada
 	server.begin();
 }
 
@@ -220,11 +220,11 @@ void capturarDatosDeRed()
 void conectarseAWifi()
 {
 	// Se imprime el modo de funcionamiento del dispositivo
-	Serial.println(WiFi.getMode());         
+	Serial.println(WiFi.getMode());     //esta linea seguro se va desp..estaba cuando no sabia porque no andaba     
 	// Se intenta conectar a la red WiFi que eligio el usuario en la pagina web
 	WiFi.begin(STAssid, STAPass); 
 	Serial.print("Connecting to ");
-	Serial.print(STAssid);
+	Serial.print(STAssid);// esta y la de abajo tambien eran para debugear
 	Serial.print(STAPass);
 	// Se espera hasta que se conecte
 	while (WiFi.status() != WL_CONNECTED) 
