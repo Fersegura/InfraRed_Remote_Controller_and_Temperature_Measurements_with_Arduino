@@ -215,6 +215,12 @@
                                   <p>Informe histórico</p>
                               </a>
                           </li>
+                          <li class="nav-item">
+                              <a href="pages/charts/solicitar_informe.php" class="nav-link">
+                                  <i class="far fa-circle nav-icon"></i>
+                                  <p>Solicitar informe</p>
+                              </a>
+                          </li>
                     </ul>
                 </li><!-- /.graficos -->
 

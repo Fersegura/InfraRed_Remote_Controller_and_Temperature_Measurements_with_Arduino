@@ -1,8 +1,5 @@
 <?php
-  //This line will make the page auto-refresh each 15 seconds
-  $page = $_SERVER['PHP_SELF'];
-  $sec = "15";
-  include("../../../php/database_connect.php"); //We include the database_connect.php which has the data for the connection to the database
+  require_once("../../../php/database_connect.php"); //We include the database_connect.php which has the data for the connection to the database
 
   // Check the connection
   if (mysqli_connect_errno()) {
@@ -17,7 +14,6 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!--//I've used bootstrap for the tables, so I inport the CSS files for taht as well...-->
-    <meta http-equiv="refresh" content="<?php echo $sec?>;URL='<?php echo $page?>'">	
     <title>Graficos / Temperatura</title>
 
     <!-- Google Font: Source Sans Pro -->
@@ -158,13 +154,13 @@
                               </a>
                           </li>
                           <li class="nav-item">
-                              <a href="#" class="nav-link">
+                              <a href="./historico.php" class="nav-link">
                                   <i class="far fa-circle nav-icon"></i>
                                   <p>Informe histórico</p>
                               </a>
                           </li>
                           <li class="nav-item">
-                              <a href="./solicitar_informe.php" class="nav-link">
+                              <a href="#" class="nav-link">
                                   <i class="far fa-circle nav-icon"></i>
                                   <p>Solicitar informe</p>
                               </a>
@@ -205,12 +201,12 @@
           <div class="container-fluid">
             <div class="row mb-2">
               <div class="col-sm-6">
-                <h1>Temperatura y Humedad</h1>
+                <h1>Solicitar informe de temperatura y humedad</h1>
               </div>
               <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
                   <li class="breadcrumb-item"><a href="../../index.php">Inicio</a></li>
-                  <li class="breadcrumb-item active">Temperatura y humedad históricos</li>
+                  <li class="breadcrumb-item active">Solicitar informe</li>
                 </ol>
               </div>
             </div>
@@ -221,15 +217,58 @@
         <section class="content">
           <div class="container-fluid">
             <div class="row">
+              
+              <!-- Ingresar fecha -->
+              <div class="col-lg-12 col-6">
+                  <div class="card card-warning card-outline">
+                      <div class="card-header">
+                          <h3 class="card-title" style="font-size: 20px;">
+                          <i class="fas fa-edit"></i>
+                          Seleccionar fecha
+                          </h3>
+                          <div class="card-tools">
+                              <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                  <i class="fas fa-minus"></i>
+                              </button>
+                              <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                  <i class="fas fa-times"></i>
+                              </button>
+                          </div>
+                      </div>
+                      <div class="card-body pad table-responsive">
+
+                        <!-- Aca entra el .php que hace request a la BD para obtener el uinit_id y el column1 y 2 -->
+                        <?php
+
+                          $result = mysqli_query($con,"SELECT `id` FROM `ESPtable2`");//table select
+                          // Por el momento como hago un SELECT de solo la columna 'id' y la tabla tiene un solo dispositivo, la row tendria solo un valor en teoria
+                          $row = mysqli_fetch_array($result);
+                          $unit_id = $row['id'];
+
+                        ?>
+
+                        <p style="font-size: large;">Ingrese una fecha válida por favor: </p>
+
+                        <form action="../../request_informe.php" method="post">
+                            <label for="inicio">Desde: </label>
+                            <input type="date" id="inicio" min=<?php require_once('../../../php/func_temp.php'); get_fecha($con, "inicio");?> max=<?php get_fecha($con, "final");?> value=<?php get_fecha($con, "inicio");?> name="from"><br></br>
+                            <label for="final">Hasta: </label>
+                            <input type="date" id="final" min=<?php get_fecha($con, "inicio");?> max=<?php get_fecha($con, "final");?> value=<?php get_fecha($con, "final");?> name="to"><br></br>
+                            <input type='hidden' name='unit' value=<?php echo $unit_id; ?> >
+                            <input type= 'submit' class="btn btn-warning" name= 'change_but' style='font-size: 18px; text-align:center;' value='Seleccionar'>
+                        </form>
+
+                      </div><!-- /.card-body -->
+                  </div><!-- /.card -->
+              </div><!-- /.col -->
 
               <div class="col-lg-12 col-6">
                   <!-- Temperatura -->
                   <div class="card card-primary">
                     <div class="card-header">
-                      <h3 class="card-title">
                       <h3 class="card-title" style="font-size: 20px;">
                         <i class="fas fa-thermometer-half"></i>
-                        Temperatura histórica
+                        Temperatura del periodo
                       </h3>
 
                       <div class="card-tools">
@@ -260,7 +299,7 @@
                     <div class="card-header">
                       <h3 class="card-title" style="font-size: 20px;">
                         <i class="fas fa-tint"></i>
-                        Humedad histórica
+                        Humedad del periodo
                       </h3>
 
                       <div class="card-tools">
@@ -283,13 +322,14 @@
 
                     </div><!-- /.card-body -->
                   </div><!-- /.card -->
-                </div><!-- /.col (LEFT) -->
+              </div><!-- /.col (LEFT) -->
 
             </div><!-- /.row -->
           </div><!-- /.container-fluid -->
         </section><!-- /.content -->
       </div><!-- /.content-wrapper -->
       
+      <br></br>
       <br></br>
       <br></br>
       <!-- Page Footer -->
@@ -313,6 +353,7 @@
 
     <!-- Page specific script -->
     <script type="text/javascript">
+
       Highcharts.chart('temperatura', {
         chart: {
             type: 'spline',
@@ -322,7 +363,7 @@
             }
         },
         title: {
-            text: 'Temperatura histórica',
+            text: 'Temperatura del periodo solicitado',
             align: 'center'
         },
         subtitle: {
@@ -398,7 +439,7 @@
             data: [
                     <?php 
                       require_once('../../../php/func_temp.php');
-                      temperatura_diaria("","0","","","temperatura",$con);
+                      temperatura_diaria("","0","","solicitado","temperatura",$con);
                     ?>
             ]
 
@@ -419,11 +460,11 @@
             }
         },
         title: {
-            text: 'Humedad histórica',
+            text: 'Humedad del periodo solicitado',
             align: 'center'
         },
         subtitle: {
-            text: 'Ubicacion: pieza del Fer',
+            text: 'Ubicacion: pieza del Fer.',
             align: 'left'
         },
         xAxis: {
@@ -486,7 +527,7 @@
             data: [
                     <?php 
                       require_once('../../../php/func_temp.php');
-                      temperatura_diaria("","0","","","humedad",$con);
+                      temperatura_diaria("","0","","solicitado","humedad",$con);
                     ?>
             ]
 

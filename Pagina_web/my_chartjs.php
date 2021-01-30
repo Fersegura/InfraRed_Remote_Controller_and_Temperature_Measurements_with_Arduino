@@ -163,6 +163,12 @@
                                   <p>Informe histórico</p>
                               </a>
                           </li>
+                          <li class="nav-item">
+                              <a href="./solicitar_informe.php" class="nav-link">
+                                  <i class="far fa-circle nav-icon"></i>
+                                  <p>Solicitar informe</p>
+                              </a>
+                          </li>
                       </ul>
                   </li><!-- /.graficos -->
 
@@ -219,7 +225,10 @@
                   <!-- Temperatura -->
                   <div class="card card-primary">
                     <div class="card-header">
-                      <h3 class="card-title">Temperatura</h3>
+                      <h3 class="card-title"style="font-size: 20px;">
+                        <i class="fas fa-thermometer-half"></i>
+                        Temperatura
+                        </h3>
 
                       <div class="card-tools">
                         <button type="button" class="btn btn-tool" data-card-widget="collapse">
@@ -247,7 +256,10 @@
                   <!-- Humedad -->
                   <div class="card card-success">
                     <div class="card-header">
-                      <h3 class="card-title">Humedad</h3>
+                      <h3 class="card-title"style="font-size: 20px;">
+                        <i class="fas fa-tint"></i>
+                        Humedad
+                      </h3>
 
                       <div class="card-tools">
                         <button type="button" class="btn btn-tool" data-card-widget="collapse">
@@ -312,8 +324,7 @@
             align: 'center'
         },
         subtitle: {
-            text: 'Ubicacion: Pieza del Fer. Fecha: <?php require_once("../../../php/func_temp.php"); 
-                                                      get_fecha($con);?>',
+            text: 'Ubicacion: Pieza del Fer',
             align: 'left'
         },
         xAxis: {
@@ -327,7 +338,7 @@
                 text: 'Grados [°C]'
             },
             minorGridLineWidth: 0,
-            gridLineWidth: 0,
+            gridLineWidth: 1,
             alternateGridColor: null,
             plotBands: [{ // Falta agua
                 from: 15,
@@ -410,8 +421,7 @@
             align: 'center'
         },
         subtitle: {
-            text: 'Ubicacion: pieza del Fer. Fecha: <?php require_once("../../../php/func_temp.php"); 
-                                                      get_fecha($con);?>',
+            text: 'Ubicacion: pieza del Fer',
             align: 'left'
         },
         xAxis: {

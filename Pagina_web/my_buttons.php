@@ -153,6 +153,12 @@
                                   <p>Informe histórico</p>
                               </a>
                           </li>
+                          <li class="nav-item">
+                              <a href="../charts/solicitar_informe.php" class="nav-link">
+                                  <i class="far fa-circle nav-icon"></i>
+                                  <p>Solicitar informe</p>
+                              </a>
+                          </li>
                         </ul>
                     </li><!-- /.graficos -->
 
@@ -564,7 +570,7 @@
                                                             <input type='hidden' name='column' value=<?php echo $column11; ?> >
                                                             <input type= 'submit' class="btn btn-warning" name= 'change_but' style='margin-top: 1%; font-size: 18px; text-align:center;' value='Enviar'>
                                                     </form>
-                                       
+                                                </td>
                                                 
                                             </tr>
                                         </tbody>

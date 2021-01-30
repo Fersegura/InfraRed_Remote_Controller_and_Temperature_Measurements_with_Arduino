@@ -162,6 +162,12 @@
                                   <p>Informe histórico</p>
                               </a>
                           </li>
+                          <li class="nav-item">
+                              <a href="charts/solicitar_informe.php" class="nav-link">
+                                  <i class="far fa-circle nav-icon"></i>
+                                  <p>Solicitar informe</p>
+                              </a>
+                          </li>
                     </ul>
                 </li><!-- /.graficos -->
 
@@ -223,7 +229,7 @@
                             <div class="card card-primary card-outline">
                                 <div class="card-header">
                                     <h3 class="card-title" style="font-size: 20px;">
-                                    <i class="fas fa-edit"></i>
+                                    <i class="fas fa-chevron-right"></i>
                                     Datos de los estados de los dispositivos 
                                     </h3>
                                     <div class="card-tools">
@@ -325,7 +331,7 @@
                             <div class="card card-primary card-outline">
                                 <div class="card-header">
                                     <h3 class="card-title" style="font-size: 20px;">
-                                    <i class="fas fa-edit" ></i>
+                                    <i class="fas fa-chevron-right"></i>
                                     Datos sensados por los dispositivos 
                                     </h3>
                                     <div class="card-tools">

@@ -14,8 +14,7 @@ if (mysqli_connect_errno()) {
 }
 
 //Now update the value sent from the post (ON/OFF, change or send button)
-mysqli_query($con,"UPDATE `ESPtable2` SET $column = '{$value}'
-WHERE id=$unit");
+mysqli_query($con,"UPDATE `ESPtable2` SET $column = '{$value}' WHERE id=$unit");
 
 //go back to the LTE interface
 header("location: pages/UI/my_buttons.php");
