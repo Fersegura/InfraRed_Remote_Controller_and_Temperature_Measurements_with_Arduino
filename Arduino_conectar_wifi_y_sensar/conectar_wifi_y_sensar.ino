@@ -1,7 +1,10 @@
+#include <Arduino.h>
 // Librerias necesarias.
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
-#include "DHT.h"        
+#include "DHT.h"  
+#include <EEPROM.h>      
+
 
 #define DHTTYPE DHT11   // Se crea un objeto DHT11.
 #define dht_dpin 0      // Pin al cual estara conectado el sensor.
@@ -10,6 +13,13 @@ DHT dht(dht_dpin, DHTTYPE); // Inicializacion del sensor.
 
 // Ingresar el URL del host propio.
 #define HOST ""          // Ingresar el URL del host sin "http:// "  y "/" al final del URL.
+//Estructura de datos para guardar en la EEPROM
+struct Condiciones
+{
+	String SSIDEEPROM;
+	String PASSEEPROM;
+	boolean Conectarse;
+};
 
 // Variables globales:
 String temp, hum, postData;
@@ -22,35 +32,39 @@ String header;
 String redes[15];                 		// Arreglo que guarda hasta 15 redes.
 int cantidadredes = 0;			  		// Cantidad de redes encontradas.
 String datos;					  		// Para almacenar la informacion devuelta por el cliente 
-String STAssid;         		 		// Nombre de la red a la que se conectara el ESP8266 cuando este en modo STA.
-String STAPass;         				// Contraseña de dicha red.
-boolean conectado = false;      		// Flag que indica si el dispositivo esta o no conectado a alguna red.
+
 unsigned long currentTime = millis(); 	// Tiempo actual.
 unsigned long previousTime = 0;       	// Tiempo anterior.
 const long timeoutTime = 2000;        	// Se define un timeout en milisegundos (example: 2000ms = 2s).
 WiFiServer server(80);
-
+Condiciones conexion;					//es la estructura que guarda todos los parámetros de conexción
+Condiciones actuales; //la use para verificar cosas
 // Prototipos de funciones:
 void seleccionarRedWifi();
 void capturarDatosDeRed();
 void conectarseAWifi();
 void transmitirDatos();
 void guardarRedes(int );
-
+void guardarEEPROM();
+void recuperarEEPROM();
+void grabar(int , String );
+String leer(int );
 // Codigo:
 
 void setup() 
 {
-	// Se inicializa el monitor serial con un baudaje de 115200
-	Serial.begin(115200);
+	pinMode(LED_BUILTIN,OUTPUT);
+	EEPROM.begin(512);							//Para poder usar la memoria EEPROM se inicia (valor maximo es de 4096 Bytes)
+	recuperarEEPROM(); 							//Apenas iniciamos buscamos si habia alguna red guardada por el caso que se corte la luz
+	Serial.begin(115200);						//Se inicializa el monitor serial con un baudaje de 115200
 	Serial.println();
-	// Se inicializa el modo WiFi para que funcione en modo AP y STA 
-	WiFi.mode(WIFI_AP_STA);  
+	WiFi.mode(WIFI_AP_STA);  					//Se inicializa el modo WiFi para que funcione en modo AP y STA 
 	Serial.print("Estableciendo configuración Soft-AP... ");
 	Serial.println(WiFi.softAPConfig(local_IP, gateway, subnet) ? "Listo" : "Falló!");
 	Serial.print("Setting soft-AP ... ");
-	boolean result = WiFi.softAP(ssid , pass);		// PARA QUE ESTA ESTA BANDERA??????????  ESTO ESTABA ASI en realidad el Wifi.softAP hace que empiece a emitir y devuelve un boolean, y lo guarda al pedo porque desp no lo usamos en nada
-	server.begin();
+	WiFi.softAP(ssid , pass);					//Arrancamos la generacion de wifi de red local del dispositivo que permite configurarlo
+	server.begin();								//Iniciamos el servidor
+	if(conexion.Conectarse)	conectarseAWifi();	//Si encontramos redes guardadas nos conectamos.
 }
 
 
@@ -59,11 +73,9 @@ void loop()
 	// Se guardan en un arreglo las redes WiFi
 	cantidadredes =  WiFi.scanNetworks();
 	guardarRedes(cantidadredes);
-	
 	seleccionarRedWifi();
-
 	// Si estoy conectado a una red WiFi con acceso a internet transmito la informacion
-	if(conectado)
+	if(conexion.Conectarse)
 	{
 		transmitirDatos();
 	}
@@ -128,18 +140,26 @@ void seleccionarRedWifi()
 						client.println(".button2 {background-color: #77878A;}</style></head>");
 						
 						// Cuerpo de la pagina web
-						client.println("<body><h1><b>Alarmas rispiro</b></h1>");
-						client.print("<form><select name=\"ssidelegida\">");
-						// Se listan todas las redes que se encontraron previamente
-						for(int i=0;i<cantidadredes;i++)
-						{
-							client.print("<option>"+redes[i]+"</option>");
+						if(!conexion.Conectarse){               //Si NO estamos conectados mostramos las redes disponibles y el lugar para poner el PASS
+							client.println("<body><h1><b>Alarmas rispiro</b></h1>");
+							client.print("<form><select name=\"ssidelegida\">");
+							// Se listan todas las redes que se encontraron previamente
+							for(int i=0;i<cantidadredes;i++)
+							{
+								client.print("<option>"+redes[i]+"</option>");
+							}
+							// Campo para ingresar contraseña de la red que se seleccione en la web y boton para elegirla
+							client.print(" <input type= \"password\" name=\"clavewifi\" placeholder=\"Clave wifi\" value=\"\">");
+							client.print(" <input type=\"submit\" name=\"Formulario wifi\" value=\"conectar\">");
+							client.print("</select></form>");
 						}
-						// Campo para ingresar contraseña de la red que se seleccione en la web y boton para elegirla
-						client.print(" <input type= \"password\" name=\"clavewifi\" placeholder=\"Clave wifi\" value=\"\">");
-						client.print(" <input type=\"submit\" name=\"Formulario wifi\" value=\"conectar\">");
-						client.print("</select></form>");
-					
+						else{	//---------------------->Si SI estamos conectados mostramos en que red y un boton para desconectarnos de esa red FALTA IMPLEMENTAR<--------
+							client.print("<body><h1>Conectado a:</h1>"+conexion.SSIDEEPROM);
+							client.print("<form>");
+							client.print(" <input type=\"submit\" name=\"botondesconectar\" value=\"Desconectar\">");
+							client.print("</form>");
+
+						}
 						client.println("</body></html>");
 						
 						// La respuesta HTTP termina con otra linea en blanco
@@ -172,12 +192,12 @@ void seleccionarRedWifi()
 	// Se valida la informacion de la red a la cual se conecto.
 	// Recordar que el protocola WAP2 establece SSID mayores a 4 caracteres y contraseñas de al menos 8 caracteres.
 	// Si esta todo okay me conecto a la red elegida.
-	if(STAssid.length()>4 && STAPass.length()>6)
+	if(conexion.SSIDEEPROM.length()>4 && conexion.PASSEEPROM.length()>6)     //----------------------->Ver de modificar la forma de obtener los valores<-----------------
 	{
 		Serial.print("La red wifi es: ");
-		Serial.println(STAssid);
+		Serial.println(conexion.SSIDEEPROM);
 		Serial.print("La clave es: ");
-		Serial.println(STAPass);
+		Serial.println(conexion.PASSEEPROM);
 		conectarseAWifi();
 	}
 	
@@ -186,11 +206,11 @@ void seleccionarRedWifi()
 }
 
 
-void capturarDatosDeRed()
+void capturarDatosDeRed()   //VER SI SE MODIFICA PARA OBTENER LOS DATOS
 {
 	// Se parsea el mensaje proveniente del cliente para encontrar el SSID y la contraseña de la red seleccionada.
 	// Esto se hace por dos motivos: 1) Disponer de esta informacion por si se desconecta por alguna razon para reconectarse
-	// 								 2) 
+	// 								  
 	int primercoincidencia = datos.indexOf("=");
 	int segundacoincidencia = datos.indexOf("&",primercoincidencia+1);
 	int tercera = datos.indexOf("=",segundacoincidencia+1);
@@ -199,18 +219,18 @@ void capturarDatosDeRed()
 	if(primercoincidencia<20)
 	{
 		// Una vez encontrada la informacion se la almacena en variables globales (EN UN FUTURO PUEDE GUARDARSE EN EEPROM)
-		STAssid= datos.substring(primercoincidencia+1,segundacoincidencia);
-		STAPass= datos.substring(tercera+1,cuarta);
+		conexion.SSIDEEPROM= datos.substring(primercoincidencia+1,segundacoincidencia);
+		conexion.PASSEEPROM= datos.substring(tercera+1,cuarta);
 		// Se reemplazan los simbolos '+' por espacios vacios (' ') para tener el nombre de la red y contraseña en forma correcta
-		while(STAssid.indexOf("+")>=1)
+		while(conexion.SSIDEEPROM.indexOf("+")>=1)
 		{
-			int a= STAssid.indexOf("+");
-			STAssid.setCharAt(a, ' ');
+			int a= conexion.SSIDEEPROM.indexOf("+");
+			conexion.SSIDEEPROM.setCharAt(a, ' ');
 		}
-		while(STAPass.indexOf("+")>=1)
+		while(conexion.PASSEEPROM.indexOf("+")>=1)
 		{
-			int a= STAPass.indexOf("+");
-			STAPass.setCharAt(a, ' ');
+			int a= conexion.PASSEEPROM.indexOf("+");
+			conexion.PASSEEPROM.setCharAt(a, ' ');
 		}
 	}
 
@@ -220,35 +240,63 @@ void capturarDatosDeRed()
 
 void conectarseAWifi()
 {
-	// Se imprime el modo de funcionamiento del dispositivo
-	Serial.println(WiFi.getMode());     //esta linea seguro se va desp..estaba cuando no sabia porque no andaba     
-	// Se intenta conectar a la red WiFi que eligio el usuario en la pagina web
-	WiFi.begin(STAssid, STAPass); 
+	int intentos=0;   									  //variable para que no quede en un bucle infinito
+	WiFi.begin(conexion.SSIDEEPROM, conexion.PASSEEPROM); // Se intenta conectar a la red WiFi que eligio el usuario en la pagina web
 	Serial.print("Connecting to ");
-	Serial.print(STAssid);// esta y la de abajo tambien eran para debugear
-	Serial.print(STAPass);
+	Serial.print(conexion.SSIDEEPROM);// esta y la de abajo tambien eran para debugear
 	// Se espera hasta que se conecte
-	while (WiFi.status() != WL_CONNECTED) 
+	while (WiFi.status() != WL_CONNECTED  && intentos<50 ) //intenta conectarse durante 25 seg y parpadea mientras tanto bien rápido a modo indicativo.
 	{ 
+		digitalWrite(LED_BUILTIN,HIGH);
 		Serial.print(".");
-		delay(500); 
+		delay(250); 
+		intentos++;
+		digitalWrite(LED_BUILTIN,LOW);
+		delay(250) ;       
 	}
-	// Se imprime mensaje de conexion e informacion sobre la conexion
+	
+	if(WiFi.status() == WL_CONNECTED){                    
+		// Se imprime mensaje de conexion e informacion sobre la conexion
 	Serial.println();
 	Serial.print("Connected to ");
-	Serial.println(STAssid);
+	Serial.println(conexion.SSIDEEPROM);
 	Serial.print("IP Address is : ");
 	Serial.println(WiFi.localIP());
 	// Se setea el flag 
-	conectado = true;
+	conexion.Conectarse = true;
 	// Importantisimo este delay para que funcione todo correctamente
 	delay(30);
 	// Se inicializa el sensor
 	dht.begin();
+	}
+	else	//Si no se conecta lo mostramos por serial y borramos todos los datos de la EEPROM esperando una nueva conexion
+	{
+		Serial.println("No se pudo conectar a la red. Intente nuevamente");
+		conexion.Conectarse=false;
+		conexion.PASSEEPROM="";
+		conexion.SSIDEEPROM="";
+	}
+	guardarEEPROM();
 
 	return;
 }
 
+void guardarEEPROM()	//Grabamos en los primeros 50 Bytes la SSID y en los siguientes 50 la PASS y el booleano de conectarse en la 100
+{
+	grabar(0,conexion.SSIDEEPROM);
+	grabar(50,conexion.PASSEEPROM);
+	EEPROM.put(100,conexion.Conectarse);
+	EEPROM.commit();		//Esta linea es la que confirma que se quede guardado en la EEPROM los datos
+
+}
+
+void recuperarEEPROM()	//Obtenemos los valores guardados;
+{	
+	conexion.SSIDEEPROM=leer(0);
+	conexion.PASSEEPROM=leer(50);
+	conexion.Conectarse=EEPROM.read(100);
+	
+}
 
 void transmitirDatos()
 {
@@ -306,4 +354,30 @@ void transmitirDatos()
 	digitalWrite(LED_BUILTIN, HIGH);
 
 	return;
+}
+
+void grabar(int addr, String a) {  //Funcion auxiliar para convertir el String en un Char Array y guardarlo, si el dato ocupa menos de 50 valores rellena con 255.
+  int tamano = a.length(); 
+  char inchar[50]; 
+  a.toCharArray(inchar, tamano+1);
+  for (int i = 0; i < tamano; i++) {
+    EEPROM.write(addr+i, inchar[i]);
+  }
+  for (int i = tamano; i < 50; i++) {
+    EEPROM.write(addr+i, 255);
+  }
+  EEPROM.commit();
+}
+
+
+String leer(int addr) {   //Funcion auxiliar para recuperar los valores guardados y obtenerlos como String
+   byte lectura;
+   String strlectura;
+   for (int i = addr; i < addr+50; i++) {
+      lectura = EEPROM.read(i);
+      if (lectura != 255) {
+        strlectura += (char)lectura;
+      }
+   }
+   return strlectura;
 }
