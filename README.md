@@ -12,6 +12,7 @@ In this repository you will find example codes and tests codes we have developed
 4. [WiFi and local server connection](#wifi-and-local-server-connection)
 5. [Displaying results on a website](#displaying-results-on-a-website)
 6. [Connecting ESP8266 to the internet](#connecting-esp8266-to-the-internet)
+7. [Going beyond with the website](#going-beyond-with-the-website)
 
 ### IR Remote Controller
 
@@ -95,3 +96,11 @@ After reading the documentation of the [*ESP8266 Arduino Core*](https://github.c
 
 We decided that in order to get the most out of the ESP8266, first it had to initiate it in *AP* mode and list all the networks available so the user can choose to which connect from. After that, the microcontroller enters in *station* mode and then statrts sensing temperature and humidity data and sending it to the database. We inspired our code in [this](https://www.youtube.com/watch?t=750&v=TB7LmR9h-NA&feature=youtu.be) tutorial.
 
+A useful function we implemented is that the microcontroller saves in its *EEPROM* the *SSID* and *password* of the last connected network. This is useful for example if the power goes of, when it's turn on again the device tries to connect to the network without needing the user to configure it again.
+
+All the user configuration (selecting the correct network (*SSID*) and introducing the network *password*) is done with the user connecting to the device's network (while in *AP* mode) and enterning to a specific site (determined by the *local IP adress* saved in the microcontroller code, in this case is: 192.168.4.22) that shows all the availble information.
+
+
+### Going beyond with the website
+
+In order to make a more professional website, we decided to implement a user managment system. The users now only have access to the index page without logging in. If the user wants to visit the other pages it has to either log in or register as a new user. The system is a bit rudimentary for the moment but we are looking forward adding more and better features (as for example logging in with G+ or Facebook, and verify the email adress).
