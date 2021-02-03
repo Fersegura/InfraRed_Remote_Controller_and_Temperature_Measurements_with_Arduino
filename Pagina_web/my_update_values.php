@@ -6,7 +6,7 @@ $unit = strip_tags($_POST['unit']);			//Get the id if the unit where we want to 
 $column = strip_tags($_POST['column']);		//Which coulumn of the database, could be the RECEIVED_BOOL1, etc...
 
 //connect to the database
-include("../php/database_connect.php"); //We include the database_connect.php which has the data for the connection to the database
+include("./database_connect.php"); //We include the database_connect.php which has the data for the connection to the database
 
 // Check the connection
 if (mysqli_connect_errno()) {
@@ -17,5 +17,5 @@ if (mysqli_connect_errno()) {
 mysqli_query($con,"UPDATE `ESPtable2` SET $column = '{$value}' WHERE id=$unit");
 
 //go back to the LTE interface
-header("location: pages/UI/my_buttons.php");
+header("location: ../pages/UI/my_buttons.php");
 ?>

@@ -1,16 +1,28 @@
 <?php
-    //This line will make the page auto-refresh each 15 seconds
-    $page = $_SERVER['PHP_SELF'];
-    $sec = "15";
 
-    // LO PRIMERO QUE HAGO ES CONECTARME A LA BD
+  // Inicio para poder usar variables de sesion y gestionar usuarios de la mejor forma
+  session_start();
 
-    include("../../php/database_connect.php"); //We include the database_connect.php which has the data for the connection to the database
+  //This line will make the page auto-refresh each 15 seconds
+  $page = $_SERVER['PHP_SELF'];
+  $sec = "15";
+  // Checkeo si el usuario inicio sesion
+  if($_SESSION['logged'] != 'yes')
+  {
+    echo "<script type='text/javascript'>alert('Usted no inició sesión.');</script>";
+    echo "<script type='text/javascript'>window.location.href = './examples/my_login-v2.php';</script>";
+    die();
+  }
 
-    // Check the connection
-    if (mysqli_connect_errno()) {
-        echo "Failed to connect to MySQL: " . mysqli_connect_error();
-    }
+  // Me conecto a la BD si estoy en sesion iniciada
+  include("../my_php/database_connect.php"); //We include the database_connect.php which has the data for the connection to the database
+
+  // Check the connection
+  if (mysqli_connect_errno()) {
+    echo "Failed to connect to MySQL: " . mysqli_connect_error();
+  }
+
+
 ?>
 
 <!-- Por el momento solo le voy a agregar el coso de que se refresque cada $sec del index de NOOBIX, 
@@ -23,7 +35,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <!--//I've used bootstrap for the tables, so I inport the CSS files for taht as well...-->
         <meta http-equiv="refresh" content="<?php echo $sec?>;URL='<?php echo $page?>'">		
-        <title>Recibidos Prueba NOOBIX</title>
+        <title>Datos recibidos</title>
 
         <!-- Google Font: Source Sans Pro -->
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
@@ -39,6 +51,8 @@
         <script src="../dist/js/adminlte.min.js"></script>
         <!-- AdminLTE for demo purposes -->
         <script src="../dist/js/demo.js"></script>
+        <!-- Web Browser icon -->
+        <link  rel="shortcut icon"   href="../dist/img/SyFLogo.ico" type="image/ico" />
 
     </head> 
 
@@ -60,6 +74,11 @@
           <li class="nav-item d-none d-sm-inline-block">
             <a href="#" class="nav-link">Contacto</a>
           </li>
+          <li class="nav-item d-none d-sm-inline-block">
+            <a href="./examples/my_login-v2.php" class="nav-link">Iniciar sesion</a>
+          </li>          
+          <li class="nav-item d-none d-sm-inline-block">
+            <a href="../my_php/cerrar_sesion.php" class="nav-link">Cerrar sesion</a>
         </ul>
 
         <!-- Right navbar links -->

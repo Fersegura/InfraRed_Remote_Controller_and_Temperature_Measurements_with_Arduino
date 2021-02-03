@@ -1,12 +1,23 @@
 <?php
-  // LO PRIMERO QUE HAGO ES CONECTARME A LA BD  
-  include("../../../php/database_connect.php"); //We include the database_connect.php which has the data for the connection to the database
 
-  // Check the connection
-  if (mysqli_connect_errno()) {
-    echo "Failed to connect to MySQL: " . mysqli_connect_error();
-  }
-  
+    // Inicio para poder usar variables de sesion y gestionar usuarios de la mejor forma
+    session_start();
+
+    // Checkeo si el usuario inicio sesion
+    if($_SESSION['logged'] != 'yes')
+    {
+        echo "<script type='text/javascript'>alert('Usted no inició sesión.');</script>";
+        echo "<script type='text/javascript'>window.location.href = '../examples/my_login-v2.php';</script>";
+        die();
+    }
+
+    // Me conecto a la BD   
+    include("../../my_php/database_connect.php"); //We include the database_connect.php which has the data for the connection to the database
+
+    // Check the connection
+    if (mysqli_connect_errno()) {
+        echo "Failed to connect to MySQL: " . mysqli_connect_error();
+    }
 ?>
 
 
@@ -16,7 +27,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">		
-        <title>Botones Prueba NOOBIX</title>
+        <title>Enviar datos</title>
 
 
         <!-- Google Font: Source Sans Pro -->
@@ -33,6 +44,8 @@
         <script src="../../dist/js/adminlte.min.js"></script>
         <!-- AdminLTE for demo purposes -->
         <script src="../../dist/js/demo.js"></script>
+        <!-- Web Browser icon -->
+        <link  rel="shortcut icon"   href="../../dist/img/SyFLogo.ico" type="image/ico" />
     </head>
 
     <body class="hold-transition sidebar-mini">
@@ -49,6 +62,12 @@
                     </li>
                     <li class="nav-item d-none d-sm-inline-block">
                         <a href="#" class="nav-link">Contacto</a>
+                    </li>
+                    <li class="nav-item d-none d-sm-inline-block">
+                        <a href="../examples/my_login-v2.php" class="nav-link">Iniciar sesion</a>
+                    </li>          
+                    <li class="nav-item d-none d-sm-inline-block">
+                        <a href="../../my_php/cerrar_sesion.php" class="nav-link">Cerrar sesion</a>
                     </li>
                 </ul>
 
@@ -335,7 +354,7 @@
                                                 <td><?php echo $unit_id;?></td> <!-- .row['id']. -->
                                                 <!-- El tamaño de los botones depende del tamaño de la letra -->
                                                 <td>
-                                                    <form action= "../../my_update_values.php" method= 'post'>
+                                                    <form action= "../../my_php/my_update_values.php" method= 'post'>
                                                         <input type='hidden' name='value2' value=<?php echo $current_bool_1; ?>   size='15' >	
                                                         <input type='hidden' name='value' value=<?php echo $inv_current_bool_1; ?>  size='15' >	
                                                         <input type='hidden' name='unit' value=<?php echo $unit_id; ?> >
@@ -347,7 +366,7 @@
                                                     </form>
                                                 </td>
                                                 <td>
-                                                    <form action= "../../my_update_values.php" method= 'post'>
+                                                    <form action= "../../my_php/my_update_values.php" method= 'post'>
                                                         <input type='hidden' name='value2' value=<?php echo $current_bool_2; ?>   size='15' >	
                                                         <input type='hidden' name='value' value=<?php echo $inv_current_bool_2; ?>  size='15' >	
                                                         <input type='hidden' name='unit' value=<?php echo $unit_id; ?> >
@@ -356,7 +375,7 @@
                                                     </form>
                                                 </td>
                                                 <td>
-                                                    <form action= "../../my_update_values.php" method= 'post'>
+                                                    <form action= "../../my_php/my_update_values.php" method= 'post'>
                                                         <input type='hidden' name='value2' value=<?php echo $current_bool_3; ?>   size='15' >	
                                                         <input type='hidden' name='value' value=<?php echo $inv_current_bool_3; ?>  size='15' >	
                                                         <input type='hidden' name='unit' value=<?php echo $unit_id; ?> >
@@ -365,7 +384,7 @@
                                                     </form>
                                                 </td>
                                                 <td>
-                                                    <form action= "../../my_update_values.php" method= 'post'>
+                                                    <form action= "../../my_php/my_update_values.php" method= 'post'>
                                                         <input type='hidden' name='value2' value=<?php echo $current_bool_4; ?>   size='15' >	
                                                         <input type='hidden' name='value' value=<?php echo $inv_current_bool_4; ?>  size='15' >	
                                                         <input type='hidden' name='unit' value=<?php echo $unit_id; ?> >
@@ -374,7 +393,7 @@
                                                     </form>
                                                 </td>
                                                 <td>
-                                                    <form action= "../../my_update_values.php" method= 'post'>
+                                                    <form action= "../../my_php/my_update_values.php" method= 'post'>
                                                         <input type='hidden' name='value2' value=<?php echo $current_bool_5; ?>   size='15' >	
                                                         <input type='hidden' name='value' value=<?php echo $inv_current_bool_5; ?>  size='15' >	
                                                         <input type='hidden' name='unit' value=<?php echo $unit_id; ?> >
@@ -383,12 +402,6 @@
                                                     </form>
                                                 </td>
                                                 
-
-
-
-
-
-
                                             </tr>
                                         </tbody>
                                     </table><!-- ./tabla-botones-->
@@ -461,7 +474,7 @@
                                                 <td><?php echo $unit_id;?></td> <!-- .row['id']. -->
                                                 <!-- El tamaño de los botones depende del tamaño de la letra -->
                                                 <td>
-                                                    <form action= "../../my_update_values.php" method= 'post'>
+                                                    <form action= "../../my_php/my_update_values.php" method= 'post'>
                                                         <input type='text' name='value' style='width: 120px;' value=<?php echo $current_num_1; ?>  size='15' >
                                                         <input type='hidden' name='unit' style='width: 120px;' value=<?php echo $unit_id; ?> >
                                                         <input type='hidden' name='column' style='width: 120px;' value=<?php echo $column6; ?> >
@@ -472,7 +485,7 @@
                                                     </form>
                                                 </td>
                                                 <td>
-                                                    <form action= "../../my_update_values.php" method= 'post'>
+                                                    <form action= "../../my_php/my_update_values.php" method= 'post'>
                                                         <input type='text' name='value' style='width: 120px;' value=<?php echo $current_num_2; ?>  size='15' >
                                                         <input type='hidden' name='unit' style='width: 120px;' value=<?php echo $unit_id; ?> >
                                                         <input type='hidden' name='column' style='width: 120px;' value=<?php echo $column7; ?> >
@@ -480,7 +493,7 @@
                                                     </form>
                                                 </td>
                                                 <td>
-                                                    <form action= "../../my_update_values.php" method= 'post'>
+                                                    <form action= "../../my_php/my_update_values.php" method= 'post'>
                                                         <input type='text' name='value' style='width: 120px;' value=<?php echo $current_num_3; ?>  size='15' >
                                                         <input type='hidden' name='unit' style='width: 120px;' value=<?php echo $unit_id; ?> >
                                                         <input type='hidden' name='column' style='width: 120px;' value=<?php echo $column8; ?> >
@@ -488,7 +501,7 @@
                                                     </form>
                                                 </td>
                                                 <td>
-                                                    <form action= "../../my_update_values.php" method= 'post'>
+                                                    <form action= "../../my_php/my_update_values.php" method= 'post'>
                                                         <input type='text' name='value' style='width: 120px;' value=<?php echo $current_num_4; ?>  size='15' >
                                                         <input type='hidden' name='unit' style='width: 120px;' value=<?php echo $unit_id; ?> >
                                                         <input type='hidden' name='column' style='width: 120px;' value=<?php echo $column9; ?> >
@@ -496,7 +509,7 @@
                                                     </form>
                                                 </td>
                                                 <td>
-                                                    <form action= "../../my_update_values.php" method= 'post'>
+                                                    <form action= "../../my_php/my_update_values.php" method= 'post'>
                                                         <input type='text' name='value' style='width: 120px;' value=<?php echo $current_num_5; ?>  size='15' >
                                                         <input type='hidden' name='unit' style='width: 120px;' value=<?php echo $unit_id; ?> >
                                                         <input type='hidden' name='column' style='width: 120px;' value=<?php echo $column10; ?> >
@@ -564,7 +577,7 @@
                                                 <td><?php echo $unit_id;?></td> <!-- .row['id']. -->
                                                 <!-- El tamaño de los botones depende del tamaño de la letra -->
                                                 <td>
-                                                    <form action= "../../my_update_values.php" method= 'post'>
+                                                    <form action= "../../my_php/my_update_values.php" method= 'post'>
                                                           	<input style='width: 100%;' type='text' name='value' value=<?php echo $current_text_1; ?>  size='100'>
                                                             <input type='hidden' name='unit' value=<?php echo $unit_id; ?> >
                                                             <input type='hidden' name='column' value=<?php echo $column11; ?> >

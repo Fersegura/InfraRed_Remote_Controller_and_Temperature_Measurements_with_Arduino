@@ -4,7 +4,7 @@
     $unit = strip_tags($_POST['unit']);		//Get the id if the unit where we want to update the value
 
     //connect to the database
-    include("../php/database_connect.php"); //We include the database_connect.php which has the data for the connection to the database
+    include("./database_connect.php"); //We include the database_connect.php which has the data for the connection to the database
 
     // Check the connection
     if (mysqli_connect_errno()) {
@@ -15,5 +15,5 @@
     mysqli_query($con,"UPDATE `ESPtable2` SET `fecha_desde` = '{$desde}', `fecha_hasta` = '{$hasta}' WHERE id=$unit");
 
     // go back to the LTE interface
-    header("location: ./pages/charts/solicitar_informe.php");
+    header("location: ../pages/charts/solicitar_informe.php");
 ?>

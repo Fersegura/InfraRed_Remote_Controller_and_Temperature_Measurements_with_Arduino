@@ -3,7 +3,7 @@
     $page = $_SERVER['PHP_SELF'];
     $sec = "15";
     // LO PRIMERO QUE HAGO ES CONECTARME A LA BD  
-    include("../php/database_connect.php"); //We include the database_connect.php which has the data for the connection to the database
+    include("./my_php/database_connect.php"); //We include the database_connect.php which has the data for the connection to the database
 
     // Check the connection
     if (mysqli_connect_errno()) {
@@ -22,7 +22,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!--//I've used bootstrap for the tables, so I inport the CSS files for taht as well...-->
     <meta http-equiv="refresh" content="<?php echo $sec?>;URL='<?php echo $page?>'">		
-    <title>Prueba NOOBIX</title>
+    <title>Inicio</title>
 
     <!-- Google Font: Source Sans Pro -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
@@ -111,6 +111,12 @@
           </li>
           <li class="nav-item d-none d-sm-inline-block">
             <a href="#" class="nav-link">Contacto</a>
+          </li>
+          <li class="nav-item d-none d-sm-inline-block">
+            <a href="./pages/examples/my_login-v2.php" class="nav-link">Iniciar sesion</a>
+          </li>          
+          <li class="nav-item d-none d-sm-inline-block">
+            <a href="./my_php/cerrar_sesion.php" class="nav-link">Cerrar sesion</a>
           </li>
         </ul>
 
@@ -367,7 +373,7 @@
                           name: 'Temperatura',
                           data: [
                                   <?php 
-                                    require_once('../php/func_temp.php');
+                                    require_once('./my_php/func_temp.php');
                                     temperatura_diaria("","0","","","temperatura",$con);
                                   ?>
                           ]
