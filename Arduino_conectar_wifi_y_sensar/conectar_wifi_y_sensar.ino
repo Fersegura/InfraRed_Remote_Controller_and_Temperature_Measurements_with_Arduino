@@ -9,10 +9,10 @@
 #define DHTTYPE DHT11   // Se crea un objeto DHT11.
 #define dht_dpin 0      // Pin al cual estara conectado el sensor.
 #define rele1 1
-#define rele2 2
-#define rele3 3
-#define rele4 4
-#define rele5 5
+#define rele2 4
+#define rele3 14
+#define rele4 12
+#define rele5 13
 DHT dht(dht_dpin, DHTTYPE); // Inicializacion del sensor.
 
 // Ingresar el URL del host propio.
@@ -26,6 +26,7 @@ struct Condiciones
 };
 
 // Variables globales:
+float tempe[20], hume[20]; 
 String temp, hum, postData;
 IPAddress local_IP(192,168,4,22);
 IPAddress gateway(192,168,4,9);
@@ -44,7 +45,7 @@ WiFiServer server(80);
 Condiciones conexion;					//es la estructura que guarda todos los parámetros de conexción
 int receivedNum1,receivedNum2,receivedNum3,receivedNum4,receivedNum5;
 String text_1;
-
+String variable;
 
 // Prototipos de funciones:
 void configPines();
@@ -59,6 +60,8 @@ void grabar(int , String );
 String leer(int );
 void buscardatos();
 void analizardatos(String);
+
+
 // Codigo:
 
 void setup() 
@@ -91,9 +94,9 @@ void loop()
 		transmitirDatos();
 	}
 	buscardatos();
-	delay(3000); 
+	delay(1500); 
 	digitalWrite(LED_BUILTIN, LOW);
-	delay(3000);
+	delay(1500);
 	digitalWrite(LED_BUILTIN, HIGH);
 }
 
@@ -142,6 +145,7 @@ void seleccionarRedWifi()
 						client.println("Content-type:text/html");
 						client.println("Connection: close");
 						client.println();
+						
 						
 						// Se muestra la pagina web en HTML
 						client.println("<!DOCTYPE html><html>");
@@ -206,7 +210,7 @@ void seleccionarRedWifi()
 		Serial.println("Client disconnected.");
 		Serial.println("");
 	}
-	delay(5000);
+	// delay(5000);
 
 	// Se procede a capturar la informacion de la red a la que se conecto el dispositivo
 	capturarDatosDeRed();
@@ -266,7 +270,7 @@ void conectarseAWifi()
 	Serial.print("Connecting to ");
 	Serial.print(conexion.SSIDEEPROM);// esta y la de abajo tambien eran para debugear
 	// Se espera hasta que se conecte
-	while (WiFi.status() != WL_CONNECTED  && intentos<50 ) //intenta conectarse durante 25 seg y parpadea mientras tanto bien rápido a modo indicativo.
+	while (WiFi.status() != WL_CONNECTED  && intentos<120 ) //intenta conectarse durante 25 seg y parpadea mientras tanto bien rápido a modo indicativo.
 	{ 
 		digitalWrite(LED_BUILTIN,HIGH);
 		Serial.print(".");
@@ -323,14 +327,29 @@ void transmitirDatos()
 {
 	// Se lee la humedad y temperatura del DHT11
 	float h = dht.readHumidity();
-	float t = dht.readTemperature();         
+	float t = dht.readTemperature();
+	static int index=0;        
+	Serial.print("el valor del index es =");
+	Serial.println(index);
+	tempe[index]=t;
+	hume[index]=h;
 	
-	// Se crea un objeto http de la clase HTTPClient
+	if(index==19){
+		index=0;
+		float tempsend=0;
+		float humsend=0;
+		for(int i=0; i<20;i++){
+			tempsend+=tempe[i];
+			humsend+=hume[i];
+		}
+		tempsend=tempsend/20;
+		humsend=humsend/20;
+		// Se crea un objeto http de la clase HTTPClient
 	HTTPClient http;    
 
 	// Se castean los valores censados a String (para enviarlos a la base de datos)
-	temp = String(t);  
-	hum = String(h);   
+	temp = String(tempsend);  
+	hum = String(humsend);   
 
 	// Se empieza a construir el url a enviar
 	postData = "temp=" + temp + "&hum=" + hum;
@@ -370,6 +389,9 @@ void transmitirDatos()
 
 	// Se espera algunos segundos antes de transmitir datos nuevamente 
 	
+	}
+	else
+	index++;
 
 	return;
 }
@@ -454,15 +476,50 @@ int num5B 	= aux.indexOf(",", num5A);
 int str 	= aux.indexOf(":",num5B+1); 
 //Llevamos a cabo la asignacion de los valores a cada lugar correspondiente
 int r= aux.substring(primer+1,primer+2).toInt();
-(r==1) ?digitalWrite(rele1,HIGH):digitalWrite(rele1,LOW);
+if(r==1){
+	digitalWrite(rele1,HIGH);
+	Serial.println("el estado del 1=1");
+}
+else{
+	digitalWrite(rele1,LOW);
+	Serial.println("el estado del 1=0");
+}
 r=aux.substring(segunda+1,segunda+2).toInt();
-(r==1) ?digitalWrite(rele2,HIGH):digitalWrite(rele2,LOW);
+if(r==1){
+	digitalWrite(rele2,HIGH);
+	Serial.println("el estado del 2=1");
+}
+else{
+	digitalWrite(rele2,LOW);
+	Serial.println("el estado del 2=0");
+}
 r=aux.substring(tercer+1,tercer+2).toInt();
-(r==1) ?digitalWrite(rele3,HIGH):digitalWrite(rele3,LOW);
+if(r==1){
+	digitalWrite(rele3,HIGH);
+	Serial.println("el estado del 3=1");
+}
+else{
+	digitalWrite(rele3,LOW);
+	Serial.println("el estado del 3=0");
+}
 r=aux.substring(cuarta+1,cuarta+2).toInt();
-(r==1) ?digitalWrite(rele4,HIGH):digitalWrite(rele4,LOW);
+if(r==1){
+	digitalWrite(rele4,HIGH);
+	Serial.println("el estado del 4=1");
+}
+else{
+	digitalWrite(rele4,LOW);
+	Serial.println("el estado del 4=0");
+}
 r=aux.substring(quinta+1,quinta+2).toInt();
-(r==1) ?digitalWrite(rele5,HIGH):digitalWrite(rele5,LOW);
+if(r==1){
+	digitalWrite(rele5,HIGH);
+	Serial.println("el estado del 5=1");
+}
+else{
+	digitalWrite(rele5,LOW);
+	Serial.println("el estado del 5=0");
+}
 receivedNum1=aux.substring(num1A+1,num1B-1).toInt();
 receivedNum2=aux.substring(num2A+1,num2B-1).toInt();
 receivedNum3=aux.substring(num3A+1,num3B-1).toInt();
@@ -470,12 +527,13 @@ receivedNum4=aux.substring(num4A+1,num4B-1).toInt();
 receivedNum5=aux.substring(num5A+1,num5B-1).toInt();
 text_1=aux.substring(str);
 //Parte del testeo, revisar que estamos recibiendo, veo que recibimos 2 veces el NUM4, dejar esto hasta corregir lo otro.
-Serial.println(receivedNum1);
-Serial.println(receivedNum2);
-Serial.println(receivedNum3);
-Serial.println(receivedNum4);
-Serial.println(receivedNum5);
-Serial.println(text_1);
+// Serial.println(receivedNum1);
+// Serial.println(receivedNum2);
+// Serial.println(receivedNum3);
+// Serial.println(receivedNum4);
+// Serial.println(receivedNum5);
+// Serial.println(text_1);
+// Serial.println()
 }
 
 void configPines(){   //Inicializamos los pines para el uso que van a tener por el momento todas salidas
