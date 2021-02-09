@@ -14,6 +14,7 @@ In this repository you will find example codes and tests codes we have developed
 6. [Connecting ESP8266 to the internet](#connecting-esp8266-to-the-internet)
 7. [Going beyond with the website](#going-beyond-with-the-website)
 8. [Improvements to the ESP8266 algorithm](#improvements-to-the-esp8266-algorithm)
+9. [Future modifications](#future-modifications)
 
 ### IR Remote Controller
 
@@ -116,3 +117,8 @@ The first thing we did was upgrading the user interface so the device can be dis
 Secondly, we did not like the deviation that temperature and humidity sensed values had. To solve it, we decided to collect 20 values, calculate the average and then uploading them to the database. This helps to upload less values to the database (saving not only space in the DB but also bandwith due to less HTTP requests). 
 
 Finally, we researched how to use timer interrupts. We did not find very useful documentatio, but used the example codes of [this](https://github.com/G6EJD/ESP_Interrupt_Examples/blob/master/ESP8266_Timer_Interrupts.ino) repository to find out how they work. However, many people had trouble while using timer interrupts and WiFi connectiom (sometimes the board crashes or disconnects and never re-connect again). We experienced the first problem, the board enter in *panic* mode and printed some message error in the terminal. We suspected that te reason this happened, is because the *Interrupt Service Routine* (ISR) exceeded the *Watchdog Timer* (WDT) and made the microcontroller crash. The first solution we tried, was adding the *yield()* function (similar to *delay(0)* or *delay()*) in the ISR, but it kept crashing (we added several yield() in many other parts of the code and resulted in the same error). The second solution, was creating a special ISR, that the only thing it did was toggling a flag, that was used in a conditional in the main loop function to excecute the former ISR function. This solved the problem temporarily, however we did not let the microcontroller run for several hours. Furthermore, we are not satisfied with the solution and we are looking forward finding a better way to deal with it.
+
+
+### Future modifications
+
+We are always thinking in whats next. In the [***issues***](https://github.com/OtroCuliau/InfraRed_Remote_Controller_and_Temperature_Measurements_with_Arduino/issues) section you can watch what we are planning to do next in the various parts of the project.
