@@ -54,7 +54,14 @@ void loop() {
 
 void inter()
 {
-	Serial.println();
+
+
+    millisactuales=millis();    // Tiempo actual  
+
+    // Se hace esto para cancelar el rebote de los botones. Basicamente se puede entrar en esta interrupcion cada 250 [ms] o mas (se supone que el rebote desaparece más rápido que 250ms)
+    if(millisactuales-anteriores>500)   
+    {
+        	Serial.println();
 	Serial.print("El boton 1 esta: ");
 	Serial.println(String(digitalRead(boton1)));
 	Serial.print("El boton 2 esta: ");
@@ -62,13 +69,8 @@ void inter()
 	Serial.print("El boton 3 esta: ");
 	Serial.println(String(digitalRead(boton3)));
 	Serial.println("----------------------------");
-
-    millisactuales=millis();    // Tiempo actual  
-
-    // Se hace esto para cancelar el rebote de los botones. Basicamente se puede entrar en esta interrupcion cada 250 [ms] o mas (se supone que el rebote desaparece más rápido que 250ms)
-    if(millisactuales-anteriores>500)   
-    {
-        anteriores=millisactuales;  // Se actualiza el tiempo anterior como el actual para una futura interrupcion 
+	    
+	    anteriores=millisactuales;  // Se actualiza el tiempo anterior como el actual para una futura interrupcion 
     
         // Se checkea que boton causó entrar a la interrupción y se activa el relé asociado
         if(digitalRead(boton2)) 
