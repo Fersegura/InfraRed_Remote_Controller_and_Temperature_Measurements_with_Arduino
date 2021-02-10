@@ -5,20 +5,30 @@
 #include "DHT.h"  
 #include <EEPROM.h>      
 
+// Puertos del nodeMCU ESP8266-E:
+// D1 (GPIO5): Rele1
+// D2 (GPIO4): Rele2
+// D5 (GPIO14): Rele3
+// D6 (GPIO12): Rele4
+// D4 (GPIO2): PullUp (boton para cambiar manualmente los estados de reles)
+// D8 (GPIO15): PullDown (boton para cambiar manualmente los estados de reles)
+// D3 (GPIO0): PullUp (boton para cambiar manualmente los estados de reles)
+// D7 (GPIO13): DHT11
+// D0 (GPIO16) desocupado por el momento (no anda con el DHT11). En teoria es el segundo LED de la placa (???)
 
 #define DHTTYPE DHT11   // Asocia un define a la clase DHT11 para mayor legibilidad
-#define dht_dpin 0      // Pin al cual estara conectado el sensor.
-#define rele1 1			// Pines a los cuales estaran conectados los actuadores
+#define dht_dpin 13     // Pin al cual estara conectado el sensor.
+#define rele1 5			// Pines a los cuales estaran conectados los actuadores
 #define rele2 4
 #define rele3 14
 #define rele4 12
-#define rele5 13
+#define boton1 2		// Pines para botones para cambiar manualmente estado de actuadores
+#define boton2 15
+#define boton3 0
+#define SEGUNDO_LED 16
 
 DHT dht(dht_dpin, DHTTYPE); // Inicializacion del sensor.
 
-// ESTA LINEA NO SE USAAAAA !!!!!!
-// Ingresar el URL del host propio.
-#define HOST ""          // Ingresar el URL del host sin "http:// "  y "/" al final del URL.
 
 //Estructura de datos para guardar en la EEPROM
 struct Condiciones
@@ -81,7 +91,6 @@ void setup()
 	if(conexion.Conectarse)	conectarseAWifi();	//Si encontramos redes guardadas nos conectamos.
 }
 
-
 void loop() 
 {
 	// Se guardan en un arreglo las redes WiFi
@@ -95,11 +104,10 @@ void loop()
 		buscardatos();
 	}
 	delay(1500); 
-	digitalWrite(LED_BUILTIN, LOW);
+	digitalWrite(SEGUNDO_LED, LOW);
 	delay(1500);
-	digitalWrite(LED_BUILTIN, HIGH);
+	digitalWrite(SEGUNDO_LED, HIGH);
 }
-
 
 void guardarRedes(int networksFound)
 {
@@ -108,7 +116,6 @@ void guardarRedes(int networksFound)
 		redes[i]=WiFi.SSID(i);  // Se almacenan los SSID de las redes encontradas.
 	}
 }
-
 
 void seleccionarRedWifi()
 {
@@ -229,7 +236,6 @@ void seleccionarRedWifi()
 	datos="";
 }
 
-
 void capturarDatosDeRed()   //VER SI SE MODIFICA PARA OBTENER LOS DATOS
 {
 	// Se parsea el mensaje proveniente del cliente para encontrar el SSID y la contraseña de la red seleccionada.
@@ -261,7 +267,6 @@ void capturarDatosDeRed()   //VER SI SE MODIFICA PARA OBTENER LOS DATOS
 	return;
 }
 
-
 void conectarseAWifi()
 {
 	int intentos=0;   									  //variable para que no quede en un bucle infinito
@@ -271,11 +276,11 @@ void conectarseAWifi()
 	// Se espera hasta que se conecte
 	while (WiFi.status() != WL_CONNECTED  && intentos<120 ) //intenta conectarse durante 25 seg y parpadea mientras tanto bien rápido a modo indicativo.
 	{ 
-		digitalWrite(LED_BUILTIN,HIGH);
+		digitalWrite(SEGUNDO_LED,HIGH);
 		Serial.print(".");
 		delay(250); 
 		intentos++;
-		digitalWrite(LED_BUILTIN,LOW);
+		digitalWrite(SEGUNDO_LED,LOW);
 		delay(250) ;       
 	}
 	
@@ -377,27 +382,15 @@ void transmitirDatos()
 		// Se envia un request del tipo POST al archivo PHP y se guarda la respuesta del servidor en la variable httpCode
 		int httpCode = http.POST(postData);   
 
-		// Si se establecio la conexion correctamente entonces se imprimen algunos mensajes
-		if (httpCode == 200) 
-		{ 
-			Serial.println("Valores subidos correctamente."); 
-			Serial.println(httpCode); 
-			// Se obtiene el output de la pagina web y se lo imprime
-			String webpage = http.getString();
-			Serial.println(webpage + "\n"); 
-		}
-
 		// Si fallo la conexion entonces cierro, retorno y comienzo nuevamente
-		else 
+		if (httpCode != 200) 
 		{ 
 			Serial.println(httpCode); 
 			Serial.println("Fallo al subir los valores. \n"); 
 			http.end(); 
 			return; 
 		}
-
-		// Se espera algunos segundos antes de transmitir datos nuevamente 
-	
+		
 	}
 	else	// Si no tome 20 valores todavia, incremento el indice
 		index++;
@@ -419,7 +412,6 @@ void grabar(int addr, String a)
 	EEPROM.commit();
 }
 
-
 String leer(int addr) 
 {   //Funcion auxiliar para recuperar los valores guardados y obtenerlos como String
 	byte lectura;
@@ -438,15 +430,13 @@ String leer(int addr)
 
 void buscardatos()
 {
-	HTTPClient http;    // http object of clas HTTPClient
+	HTTPClient http;    // Objeto HTTP de la clase HTTPClient
 
-	// Convert integer variables to string
+	// Se convierte el serial del dispositivo a una variable String para generar el mensaje que se enviara con POST
 	String id_serial = String(ID_SERIAL);  
-	
 	postData = "id_serial=" + id_serial;
 
-	// Update Host URL here:-  
-	
+	// Modificar con el URL del host propio:
 	http.begin("http://irresponsible-toolb.000webhostapp.com/my_php/dbread.php");	// Se conecta al host donde esta la base MySQL
 	http.addHeader("Content-Type", "application/x-www-form-urlencoded");            //Se especifica el contentHeader
 
@@ -455,12 +445,11 @@ void buscardatos()
 	if (httpCode == 200) 
 	{ 
 		// LINEAS PARA DEBUGG
-		Serial.println("Se busacaron los datos correctamente."); 
-		Serial.println(httpCode); 
+		// Serial.println("Se busacaron los datos correctamente."); 
 
 		String webpage = http.getString();    // Se obtiene la respuesta de la pagina web (el mensaje que imprime el PHP es)
 		// LINEAS PARA DEBUGG
-		Serial.println(webpage + "\n");
+		// Serial.println(webpage + "\n");
 		
 		analizardatos(webpage); 
 	}
@@ -478,6 +467,7 @@ void buscardatos()
 
 void analizardatos(String aux)
 {    //toma los datos que mandamos a pedir al server y define el estado de los reles y almacena los enteros y el string.
+
 
 	//Definimos donde vamos a encontrar los limites de cada dato
 	int primer 	= aux.indexOf(":");
@@ -535,30 +525,32 @@ void analizardatos(String aux)
 	if(r==1)
 	{
 		digitalWrite(rele4,HIGH);
-		Serial.println("el estado del 4=1");
+		Serial.println("el estado del 4=1\n");
 	}
 	else
 	{
 		digitalWrite(rele4,LOW);
-		Serial.println("el estado del 4=0");
+		Serial.println("el estado del 4=0\n");
 	}
-	r=aux.substring(quinta+1,quinta+2).toInt();
-	if(r==1)
-	{
-		digitalWrite(rele5,HIGH);
-		Serial.println("el estado del 5=1");
-	}
-	else
-	{
-		digitalWrite(rele5,LOW);
-		Serial.println("el estado del 5=0");
-	}
+	// NO HAY 5 RELES (A PESAR QUE SI HAY 5 BOTONES EN LA PAG WEB)
+	// r=aux.substring(quinta+1,quinta+2).toInt();
+	// if(r==1)
+	// {
+	// 	digitalWrite(rele5,HIGH);
+	// 	Serial.println("el estado del 5=1");
+	// }
+	// else
+	// {
+	// 	digitalWrite(rele5,LOW);
+	// 	Serial.println("el estado del 5=0");
+	// }
 	receivedNum1=aux.substring(num1A+1,num1B-1).toInt();
 	receivedNum2=aux.substring(num2A+1,num2B-1).toInt();
 	receivedNum3=aux.substring(num3A+1,num3B-1).toInt();
 	receivedNum4=aux.substring(num4A+1,num4B-1).toInt();
 	receivedNum5=aux.substring(num5A+1,num5B-1).toInt();
 	text_1=aux.substring(str);
+
 	//Parte del testeo, revisar que estamos recibiendo, veo que recibimos 2 veces el NUM4, dejar esto hasta corregir lo otro.
 	// Serial.println(receivedNum1);
 	// Serial.println(receivedNum2);
@@ -570,11 +562,17 @@ void analizardatos(String aux)
 }
 
 void configPines()
-{   //Inicializamos los pines para el uso que van a tener por el momento todas salidas
-	pinMode(LED_BUILTIN,OUTPUT);
+{   //Inicializamos los pines para el uso que van a tener
+	pinMode(SEGUNDO_LED,OUTPUT);
 	pinMode(rele1,OUTPUT);
 	pinMode(rele2,OUTPUT);
 	pinMode(rele3,OUTPUT);
 	pinMode(rele4,OUTPUT);
-	pinMode(rele5,OUTPUT);
+	// NO HAY 5 RELES
+	// pinMode(rele5,OUTPUT);
+	pinMode(boton1,INPUT);
+	pinMode(boton2,INPUT);
+	pinMode(boton3,INPUT);
+
 }
+
