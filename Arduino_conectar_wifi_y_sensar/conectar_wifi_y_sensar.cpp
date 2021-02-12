@@ -27,6 +27,7 @@
 #define boton3 0
 #define SEGUNDO_LED 16
 
+
 DHT dht(dht_dpin, DHTTYPE); // Inicializacion del sensor.
 
 
@@ -58,6 +59,11 @@ WiFiServer server(80);
 Condiciones conexion;					//es la estructura que guarda todos los parámetros de conexción
 int receivedNum1,receivedNum2,receivedNum3,receivedNum4,receivedNum5;	// Variables recibidas desde la pag. web
 String text_1;
+double millisactuales,anteriores;		// Para cancelar el rebote de los botones en el ISR
+boolean rel1=false;						// Almacena estado actual de los reles
+boolean rel2=false;
+boolean rel3=false;
+boolean rel4=false;
 
 // Prototipos de funciones:
 void configPines();
@@ -72,23 +78,38 @@ void grabar(int , String );
 String leer(int );
 void buscardatos();
 void analizardatos(String);
+// Es necesario que sea de tipo "ICACHE_RAM_ATTR" la interrupcion para que funcione correctamente
+ICACHE_RAM_ATTR void ISRbotones();
+
 
 // Codigo:
 void setup() 
 {	
-	configPines();								// Lo primero que se hace es inicializar los pines
+	Serial.begin(115200);						//Se inicializa el monitor serial con un baudaje de 115200
+		
+	// ------------ Conexion del WiFi y generacion de red propia o conexion a red guardada. -----------------------
+
+	WiFi.mode(WIFI_AP_STA);  					//Se inicializa el modo WiFi para que funcione en modo AP y STA 
 	
 	EEPROM.begin(512);							//Para poder usar la memoria EEPROM se inicia (valor maximo es de 4096 Bytes)
 	recuperarEEPROM(); 							//Apenas iniciamos buscamos si habia alguna red guardada por el caso que se corte la luz
-	Serial.begin(115200);						//Se inicializa el monitor serial con un baudaje de 115200
+	if(conexion.Conectarse)	conectarseAWifi();	//Si encontramos redes guardadas nos conectamos.
+	
 	Serial.println();
-	WiFi.mode(WIFI_AP_STA);  					//Se inicializa el modo WiFi para que funcione en modo AP y STA 
 	Serial.print("Estableciendo configuración Soft-AP... ");
 	Serial.println(WiFi.softAPConfig(local_IP, gateway, subnet) ? "Listo" : "Falló!");
-	Serial.print("Configurando soft-AP ... ");
+	Serial.print("Configurando soft-AP ... \n");
+	
 	WiFi.softAP(ssid , pass);					//Arrancamos la generacion de wifi de red local del dispositivo que permite configurarlo
 	server.begin();								//Iniciamos el servidor
-	if(conexion.Conectarse)	conectarseAWifi();	//Si encontramos redes guardadas nos conectamos.
+
+	// ------------ Resto de setup necesario para el funcionamiento del dispositivo. ------------------------------
+	configPines();			// Se inicializan los pines
+    anteriores = millis();	// Se toma nota del tiempo actual para la interrupcion por botones
+	attachInterrupt(digitalPinToInterrupt(boton1),ISRbotones,RISING);
+    attachInterrupt(digitalPinToInterrupt(boton2),ISRbotones,RISING);
+    attachInterrupt(digitalPinToInterrupt(boton3),ISRbotones,RISING);
+
 }
 
 void loop() 
@@ -103,6 +124,7 @@ void loop()
 		transmitirDatos();
 		buscardatos();
 	}
+	// Delay necesarios para el correcto funcionamiento del DHT11
 	delay(1500); 
 	digitalWrite(SEGUNDO_LED, LOW);
 	delay(1500);
@@ -574,5 +596,53 @@ void configPines()
 	pinMode(boton2,INPUT);
 	pinMode(boton3,INPUT);
 
+}
+
+void ISRbotones()
+{
+    millisactuales=millis();    // Tiempo actual  
+
+    // Se hace esto para cancelar el rebote de los botones. Basicamente se puede entrar en esta interrupcion cada 250 [ms] o mas (se supone que el rebote desaparece más rápido que 250ms)
+    if(millisactuales-anteriores>250)   
+    {
+		Serial.println();
+        Serial.print("El boton 1 esta: ");
+        Serial.println(String(digitalRead(boton1)));
+        Serial.print("El boton 2 esta: ");
+        Serial.println(String(digitalRead(boton2)));
+        Serial.print("El boton 3 esta: ");
+        Serial.println(String(digitalRead(boton3)));
+        Serial.println("----------------------------");
+        anteriores=millisactuales;  // Se actualiza el tiempo anterior como el actual para una futura interrupcion 
+    
+        // Se checkea que boton causó entrar a la interrupción y se activa el relé asociado
+        if(digitalRead(boton2)) 
+        {
+            rel3=!rel3;
+            digitalWrite(rele3,rel3);
+        
+        }
+        else
+        {
+            if(digitalRead(boton1) && digitalRead(boton3))    // Si se presiono el boton multiplexado se cambia el estado de este rele
+            {   
+                rel4=!rel4;
+                digitalWrite(rele4,rel4);
+            }
+            else
+            {
+                if(digitalRead(boton1))
+                {
+                    rel1=!rel1;
+                    digitalWrite(rele1,rel1);
+                }
+                if(digitalRead(boton3))
+                {
+                    rel2=!rel2;
+                    digitalWrite(rele2,rel2);
+                }
+            }
+        }
+    }
 }
 
