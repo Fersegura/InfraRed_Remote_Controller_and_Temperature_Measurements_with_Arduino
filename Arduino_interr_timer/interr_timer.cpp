@@ -1,6 +1,7 @@
 /*
     Ejemplo interrupcion con timer1
     Autor: Santiago Raimondi
+    Para mas informacion ir a: https://github.com/esp8266/Arduino/blob/eea9999dc5eaf464a432f77d5b65269f9baf198d/cores/esp8266/Arduino.h
 */
 
 #include <ESP8266WiFi.h>
@@ -23,7 +24,7 @@ void setup()
     // Si fuese TIM_SINGLE, interrumpe la primer vez, y si adentro de la ISR no recargo el timer no va a interrumpir de nuevo
     // Si pongo TIM_DIV1, y 80000000 en el write, no hace un segundo de interrupcion, pero con TIM_DIV16 si lo hace (con 80000000)
     timer1_enable(TIM_DIV16, TIM_EDGE, TIM_LOOP); 
-    timer1_write(80000000); // 1 seg con TIM_DIV16
+    timer1_write(80000000); // 1 seg con TIM_DIV16. El máximo valor que se puede escribir es: 8388607
     timer1_attachInterrupt(ISRtimer1);  // Defino la función que tiene que ejecutar cuando haga overflow
     interrupts();   // Activo nuevamente interrupciones
 }
