@@ -1,3 +1,8 @@
+/*
+    Ejemplo interrupcion con timer1
+    Autor: Santiago Raimondi
+    Para mas informacion ir a: https://github.com/esp8266/Arduino/blob/eea9999dc5eaf464a432f77d5b65269f9baf198d/cores/esp8266/Arduino.h
+*/
 #include <Arduino.h>
 // Librerias necesarias.
 #include <ESP8266WiFi.h>
@@ -64,9 +69,11 @@ boolean rel1=false;						// Almacena estado actual de los reles
 boolean rel2=false;
 boolean rel3=false;
 boolean rel4=false;
+boolean flag=false;
 
 // Prototipos de funciones:
 void configPines();
+void configInterrupciones(); 
 void seleccionarRedWifi();
 void capturarDatosDeRed();
 void conectarseAWifi();
@@ -80,6 +87,7 @@ void buscardatos();
 void analizardatos(String);
 // Es necesario que sea de tipo "ICACHE_RAM_ATTR" la interrupcion para que funcione correctamente
 ICACHE_RAM_ATTR void ISRbotones();
+ICACHE_RAM_ATTR void ISRtimer1();
 
 
 // Codigo:
@@ -104,11 +112,9 @@ void setup()
 	server.begin();								//Iniciamos el servidor
 
 	// ------------ Resto de setup necesario para el funcionamiento del dispositivo. ------------------------------
-	configPines();			// Se inicializan los pines
-    anteriores = millis();	// Se toma nota del tiempo actual para la interrupcion por botones
-	attachInterrupt(digitalPinToInterrupt(boton1),ISRbotones,RISING);
-    attachInterrupt(digitalPinToInterrupt(boton2),ISRbotones,RISING);
-    attachInterrupt(digitalPinToInterrupt(boton3),ISRbotones,RISING);
+	
+    configPines();			// Se inicializan los pines
+    configInterrupciones(); // Se setean las interrupciones
 
 }
 
@@ -118,17 +124,20 @@ void loop()
 	cantidadredes =  WiFi.scanNetworks();
 	guardarRedes(cantidadredes);
 	seleccionarRedWifi();
-	// Si estoy conectado a una red WiFi con acceso a internet transmito y recibo informacion
-	if(conexion.Conectarse)
-	{
-		transmitirDatos();
-		buscardatos();
+
+	if(flag)
+	{		
+		// Si hubo interr por timer1 entro aca, y lo primero q hago es desactivar la flag hasta la proxima interr. de timer1.
+		flag=false;
+
+		// Si estoy conectado a una red WiFi con acceso a internet transmito y recibo informacion
+		if(conexion.Conectarse)
+		{
+			transmitirDatos();
+			buscardatos();
+		}
 	}
-	// Delay necesarios para el correcto funcionamiento del DHT11
-	delay(1500); 
-	digitalWrite(SEGUNDO_LED, LOW);
-	delay(1500);
-	digitalWrite(SEGUNDO_LED, HIGH);
+
 }
 
 void guardarRedes(int networksFound)
@@ -598,7 +607,24 @@ void configPines()
 
 }
 
-void ISRbotones()
+void configInterrupciones()
+{
+    noInterrupts(); // Desactivo interrupciones hasta que termino de configurar
+
+    anteriores = millis();	// Se toma nota del tiempo actual para la interrupcion por botones
+	attachInterrupt(digitalPinToInterrupt(boton1),ISRbotones,RISING);
+    attachInterrupt(digitalPinToInterrupt(boton2),ISRbotones,RISING);
+    attachInterrupt(digitalPinToInterrupt(boton3),ISRbotones,RISING);
+
+    //Inicializa el timer1 para que genere interrupciones
+    timer1_enable(TIM_DIV256, TIM_EDGE, TIM_LOOP); 
+    timer1_write(1562500); // En teoria son 5 seg con TIM_DIV256. El máximo valor que se puede escribir es: 8388607
+    timer1_attachInterrupt(ISRtimer1);  // Defino la función que tiene que ejecutar cuando haga overflow
+
+    interrupts();   // Activo nuevamente interrupciones
+}
+
+ICACHE_RAM_ATTR void ISRbotones()
 {
     millisactuales=millis();    // Tiempo actual  
 
@@ -644,5 +670,13 @@ void ISRbotones()
             }
         }
     }
+}
+
+ICACHE_RAM_ATTR void ISRtimer1()
+{
+	digitalWrite(SEGUNDO_LED, !digitalRead(SEGUNDO_LED));	// Toggleo de LED para saber que hubo interrupcion de timer1 
+
+	// Lo unico que se hace es setear una bandera que es revisada en el loop
+	flag = true;
 }
 
