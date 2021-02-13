@@ -1,3 +1,8 @@
+/*
+    Ejemplo interrupcion con timer1
+    Autor: Santiago Raimondi
+    Para mas informacion ir a: https://github.com/esp8266/Arduino/blob/eea9999dc5eaf464a432f77d5b65269f9baf198d/cores/esp8266/Arduino.h
+*/
 #include <Arduino.h>
 // Librerias necesarias.
 #include <ESP8266WiFi.h>
@@ -64,9 +69,12 @@ boolean rel1=false;						// Almacena estado actual de los reles
 boolean rel2=false;
 boolean rel3=false;
 boolean rel4=false;
+boolean flag_actualizar;
+boolean flag_enviarDatos;
 
 // Prototipos de funciones:
 void configPines();
+void configInterrupciones(); 
 void seleccionarRedWifi();
 void capturarDatosDeRed();
 void conectarseAWifi();
@@ -78,8 +86,11 @@ void grabar(int , String );
 String leer(int );
 void buscardatos();
 void analizardatos(String);
+void desconectarWifi();
+void actualizarDatos();
 // Es necesario que sea de tipo "ICACHE_RAM_ATTR" la interrupcion para que funcione correctamente
 ICACHE_RAM_ATTR void ISRbotones();
+ICACHE_RAM_ATTR void ISRtimer1();
 
 
 // Codigo:
@@ -104,11 +115,9 @@ void setup()
 	server.begin();								//Iniciamos el servidor
 
 	// ------------ Resto de setup necesario para el funcionamiento del dispositivo. ------------------------------
-	configPines();			// Se inicializan los pines
-    anteriores = millis();	// Se toma nota del tiempo actual para la interrupcion por botones
-	attachInterrupt(digitalPinToInterrupt(boton1),ISRbotones,RISING);
-    attachInterrupt(digitalPinToInterrupt(boton2),ISRbotones,RISING);
-    attachInterrupt(digitalPinToInterrupt(boton3),ISRbotones,RISING);
+	
+    configPines();			// Se inicializan los pines
+    configInterrupciones(); // Se setean las interrupciones
 
 }
 
@@ -118,17 +127,25 @@ void loop()
 	cantidadredes =  WiFi.scanNetworks();
 	guardarRedes(cantidadredes);
 	seleccionarRedWifi();
-	// Si estoy conectado a una red WiFi con acceso a internet transmito y recibo informacion
+
 	if(conexion.Conectarse)
-	{
-		transmitirDatos();
-		buscardatos();
-	}
-	// Delay necesarios para el correcto funcionamiento del DHT11
-	delay(1500); 
-	digitalWrite(SEGUNDO_LED, LOW);
-	delay(1500);
-	digitalWrite(SEGUNDO_LED, HIGH);
+		{
+			if(flag_enviarDatos){
+				flag_enviarDatos=false;
+				transmitirDatos();
+			}
+			
+			if(flag_actualizar){
+				flag_actualizar=false;
+				actualizarDatos();
+				delay(1500);
+			}
+			else{
+				buscardatos();
+			}
+		}
+	
+
 }
 
 void guardarRedes(int networksFound)
@@ -262,12 +279,16 @@ void capturarDatosDeRed()   //VER SI SE MODIFICA PARA OBTENER LOS DATOS
 {
 	// Se parsea el mensaje proveniente del cliente para encontrar el SSID y la contraseña de la red seleccionada.
 	// Esto se hace por dos motivos: 1) Disponer de esta informacion por si se desconecta por alguna razon para reconectarse
-	// 								  
+	// 		
+	int desco = datos.indexOf("Desconectar");  //buscamos si es que apretamos el boton de desconectar
+	if(desco >5){
+		desconectarWifi();		//en caso afirmativo desconectamos el disposivito del wifi
+	}					  
 	int primercoincidencia = datos.indexOf("=");
 	int segundacoincidencia = datos.indexOf("&",primercoincidencia+1);
 	int tercera = datos.indexOf("=",segundacoincidencia+1);
 	int cuarta = datos.indexOf("&",tercera+1);
-
+	
 	if(primercoincidencia<20)
 	{
 		// Una vez encontrada la informacion se la almacena en variables globales (EN UN FUTURO PUEDE GUARDARSE EN EEPROM)
@@ -388,7 +409,8 @@ void transmitirDatos()
 
 		// Se castean los valores censados a String (para enviarlos a la base de datos)
 		temp = String(tempsend);  
-		hum = String(humsend);   
+		hum = String(humsend);
+		String id_serial = String(ID_SERIAL);  
 
 		// Se empieza a construir el url a enviar
 		postData = "temp=" + temp + "&hum=" + hum;
@@ -514,29 +536,29 @@ void analizardatos(String aux)
 	if(r==1)
 	{
 		digitalWrite(rele1,HIGH);
-		Serial.println("el estado del 1=1");
+		Serial.println("el estado del rele1=1");
 	}
 	else
 	{
 		digitalWrite(rele1,LOW);
-		Serial.println("el estado del 1=0");
+		Serial.println("el estado del rele1=0");
 	}
 	r=aux.substring(segunda+1,segunda+2).toInt();
 	if(r==1)
 	{
 		digitalWrite(rele2,HIGH);
-		Serial.println("el estado del 2=1");
+		Serial.println("el estado del rele2=1");
 	}
 	else
 	{
 		digitalWrite(rele2,LOW);
-		Serial.println("el estado del 2=0");
+		Serial.println("el estado del rele2=0");
 	}
 	r=aux.substring(tercer+1,tercer+2).toInt();
 	if(r==1)
 	{
 		digitalWrite(rele3,HIGH);
-		Serial.println("el estado del 3=1");
+		Serial.println("el estado del rele3=1");
 	}
 	else
 	{
@@ -547,12 +569,12 @@ void analizardatos(String aux)
 	if(r==1)
 	{
 		digitalWrite(rele4,HIGH);
-		Serial.println("el estado del 4=1\n");
+		Serial.println("el estado del rele4=1\n");
 	}
 	else
 	{
 		digitalWrite(rele4,LOW);
-		Serial.println("el estado del 4=0\n");
+		Serial.println("el estado del rele4=0\n");
 	}
 	// NO HAY 5 RELES (A PESAR QUE SI HAY 5 BOTONES EN LA PAG WEB)
 	// r=aux.substring(quinta+1,quinta+2).toInt();
@@ -598,25 +620,39 @@ void configPines()
 
 }
 
-void ISRbotones()
+void configInterrupciones()
+{
+    noInterrupts(); // Desactivo interrupciones hasta que termino de configurar
+
+    anteriores = millis();	// Se toma nota del tiempo actual para la interrupcion por botones
+	attachInterrupt(digitalPinToInterrupt(boton1),ISRbotones,RISING);
+    attachInterrupt(digitalPinToInterrupt(boton2),ISRbotones,RISING);
+    attachInterrupt(digitalPinToInterrupt(boton3),ISRbotones,RISING);
+
+    //Inicializa el timer1 para que genere interrupciones
+    timer1_enable(TIM_DIV256, TIM_EDGE, TIM_LOOP); 
+    timer1_write(1562500); // En teoria son 5 seg con TIM_DIV256. El máximo valor que se puede escribir es: 8388607
+    timer1_attachInterrupt(ISRtimer1);  // Defino la función que tiene que ejecutar cuando haga overflow
+
+    interrupts();   // Activo nuevamente interrupciones
+}
+
+ICACHE_RAM_ATTR void ISRbotones()
 {
     millisactuales=millis();    // Tiempo actual  
-
+	
     // Se hace esto para cancelar el rebote de los botones. Basicamente se puede entrar en esta interrupcion cada 250 [ms] o mas (se supone que el rebote desaparece más rápido que 250ms)
     if(millisactuales-anteriores>250)   
     {
-		Serial.println();
-        Serial.print("El boton 1 esta: ");
-        Serial.println(String(digitalRead(boton1)));
-        Serial.print("El boton 2 esta: ");
-        Serial.println(String(digitalRead(boton2)));
-        Serial.print("El boton 3 esta: ");
-        Serial.println(String(digitalRead(boton3)));
-        Serial.println("----------------------------");
-        anteriores=millisactuales;  // Se actualiza el tiempo anterior como el actual para una futura interrupcion 
-    
+		boolean estado1 = digitalRead(boton1);
+		boolean estado2 =digitalRead(boton2);
+		boolean estado3 = digitalRead(boton3);
+        
+		anteriores=millisactuales;  // Se actualiza el tiempo anterior como el actual para una futura interrupcion 
+		flag_actualizar=true;
+		
         // Se checkea que boton causó entrar a la interrupción y se activa el relé asociado
-        if(digitalRead(boton2)) 
+        if(estado3) 
         {
             rel3=!rel3;
             digitalWrite(rele3,rel3);
@@ -624,25 +660,64 @@ void ISRbotones()
         }
         else
         {
-            if(digitalRead(boton1) && digitalRead(boton3))    // Si se presiono el boton multiplexado se cambia el estado de este rele
+            if(estado1 && estado2)    // Si se presiono el boton multiplexado se cambia el estado de este rele
             {   
                 rel4=!rel4;
                 digitalWrite(rele4,rel4);
             }
             else
             {
-                if(digitalRead(boton1))
+                if(estado1)
                 {
                     rel1=!rel1;
                     digitalWrite(rele1,rel1);
                 }
-                if(digitalRead(boton3))
+                if(estado2)
                 {
                     rel2=!rel2;
                     digitalWrite(rele2,rel2);
                 }
             }
         }
-    }
+
+	}
 }
 
+ICACHE_RAM_ATTR void ISRtimer1()
+{
+	digitalWrite(SEGUNDO_LED, !digitalRead(SEGUNDO_LED));	// Toggleo de LED para saber que hubo interrupcion de timer1 
+
+	// Lo unico que se hace es setear una bandera que es revisada en el loop
+	flag_enviarDatos=true;
+}
+
+void desconectarWifi(){
+	WiFi.disconnect();				//desconectamos el dispositivo y limpiamos la variable conexion
+	conexion.Conectarse=false;
+	conexion.PASSEEPROM="";
+	conexion.SSIDEEPROM="";
+}
+
+void actualizarDatos(){
+
+	// Se hace la rutina de enviar datos con el cliente HTTP y el mensaje a enviar por metodo POST
+
+	HTTPClient http;
+
+	postData = "rele1=" + String(rel1) + "&rele2=" + String(rel2) + "&rele3=" + String(rel3) +"&rele4=" + String(rel4) + "&rele5="+String(rel1)+ "&id_serial=" + String(ID_SERIAL);
+	Serial.println(String(rel1)+" "+String(rel2)+ " " + String(rel3)+ " "+ String(rel4));
+	
+	http.begin("http://irresponsible-toolb.000webhostapp.com/my_php/dbwrite.php");
+	http.addHeader("Content-Type", "application/x-www-form-urlencoded");	
+	
+	int httpCode = http.POST(postData);   
+
+	if (httpCode != 200) 
+	{ 
+		Serial.println(httpCode); 
+		Serial.println("Fallo al subir los valores. \n"); 
+		http.end(); 
+		return; 
+	}
+
+}
