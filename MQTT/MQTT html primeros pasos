@@ -1,0 +1,44 @@
+//Esto usa la libreria MQTT.MIN.JS y lo que hace es suscribirse a un topico: prueba y publicar sobre otro topico: salida
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>Esto es una prueba con mqtt
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <script type="text/javascript">
+    //opciones de conexion
+    const options = {
+        connectTimeout :4000,
+        clientId:'RSA-IOT',
+        keepalive:60,
+        clean:true,
+    }
+    
+    const WebSocket_URL = 'ws://34.95.168.252:8083/mqtt'
+    const client = mqtt.connect(WebSocket_URL,options);
+    client.on('connect', () => {
+        console.log('Mqtt conectado por WS! Exito!')
+        //nos suscribimos
+        client.subscribe('prueba',{qos:0},(error) => {
+            if(!error){
+                console.log('Suscripcion exitosa!')
+            }else{
+                console.log('Suscripcion fallida!')
+            }
+        })
+        client.publish('salida', 'esto es un verdadero exito',(error) =>{
+            console.log(error || 'Mensaje enviado!!!!')
+        });
+        
+    })
+    client.on('message',(topic,message)=>{
+        console.log('Mensaje recibido bajo tópico: ',topic,'->',message.toString());
+        })
+    </script>
+
+</body>
+</html>
