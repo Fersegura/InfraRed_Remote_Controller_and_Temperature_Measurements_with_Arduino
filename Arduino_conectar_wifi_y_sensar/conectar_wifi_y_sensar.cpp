@@ -1,8 +1,4 @@
-/*
-    Ejemplo interrupcion con timer1
-    Autor: Santiago Raimondi
-    Para mas informacion ir a: https://github.com/esp8266/Arduino/blob/eea9999dc5eaf464a432f77d5b65269f9baf198d/cores/esp8266/Arduino.h
-*/
+
 #include <Arduino.h>
 // Librerias necesarias.
 #include <ESP8266WiFi.h>
@@ -311,7 +307,9 @@ void capturarDatosDeRed()   //VER SI SE MODIFICA PARA OBTENER LOS DATOS
 }
 
 void conectarseAWifi()
-{
+{	
+	
+
 	int intentos=0;   									  //variable para que no quede en un bucle infinito
 	WiFi.begin(conexion.SSIDEEPROM, conexion.PASSEEPROM); // Se intenta conectar a la red WiFi que eligio el usuario en la pagina web
 	Serial.print("Connecting to ");
@@ -343,7 +341,20 @@ void conectarseAWifi()
 	}
 	else	//Si no se conecta lo mostramos por serial y borramos todos los datos de la EEPROM esperando una nueva conexion
 	{
-		Serial.println("No se pudo conectar a la red. Intente nuevamente");
+		boolean corroborar=false;
+		for(int i=0; i<cantidadredes; i++){
+			if(conexion.SSIDEEPROM.equals(redes[i])){
+				corroborar= true;
+			}
+			
+		}
+		if(corroborar){
+			Serial.println("No se pudo conectar a la red. Intente con otra clave");
+		}
+		else{
+			Serial.println("No se encontro esa red wifi");
+		}
+		
 		conexion.Conectarse=false;
 		conexion.PASSEEPROM="";
 		conexion.SSIDEEPROM="";
@@ -594,15 +605,7 @@ void analizardatos(String aux)
 	receivedNum4=aux.substring(num4A+1,num4B-1).toInt();
 	receivedNum5=aux.substring(num5A+1,num5B-1).toInt();
 	text_1=aux.substring(str);
-
-	//Parte del testeo, revisar que estamos recibiendo, veo que recibimos 2 veces el NUM4, dejar esto hasta corregir lo otro.
-	// Serial.println(receivedNum1);
-	// Serial.println(receivedNum2);
-	// Serial.println(receivedNum3);
-	// Serial.println(receivedNum4);
-	// Serial.println(receivedNum5);
-	// Serial.println(text_1);
-	// Serial.println()
+	
 }
 
 void configPines()
