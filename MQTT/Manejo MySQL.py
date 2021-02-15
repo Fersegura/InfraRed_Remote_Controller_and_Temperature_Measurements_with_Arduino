@@ -14,10 +14,10 @@ except:
     print("Cerrando el programa")
     sys.exit()
 #-------------------------------------------------------------------------------------
-#Inserto datos a la tabla datos
+# Prueba de insertar datos a la tabla datos
 with connection:
     with connection.cursor() as cursor:
-        # Create a new record
+        # Se inserta un dato de prueba en la BD
         a=int(2)
         sql = "INSERT INTO `datos` (`ID`, `fecha`, `Serie`, `temperatura`) VALUES (NULL, current_timestamp(),"+str(a)+" , '29.87');"
         try:
@@ -26,12 +26,10 @@ with connection:
         except:
             print("no se pudo enviar")
             
-    # connection is not autocommit by default. So you must commit to save
-    # your changes.
+    # Hay que hacer el commit para que impacten los cambios en la BD.
     connection.commit()
-#Pedimos todas las columnas de la tabla datos
+# Prueba de pedir todas las columnas de la tabla datos
     with connection.cursor() as cursor:
-        # Read a single record
         sql = "SELECT * FROM `datos`   "
         cursor.execute(sql,  )
         result = cursor.fetchall()
