@@ -15,6 +15,7 @@ In this repository you will find example codes and tests codes we have developed
 7. [Going beyond with the website](#going-beyond-with-the-website)
 8. [Improvements to the ESP8266 algorithm](#improvements-to-the-esp8266-algorithm)
 9. [Future modifications](#future-modifications)
+10. [MQTT](#mqtt)
 
 ### IR Remote Controller
 
@@ -126,3 +127,8 @@ The WiFi connection uses the ESP8266 *timer 0*, so there is only one timer to fr
 ### Future modifications
 
 We are always thinking in whats next. In the [***issues***](https://github.com/OtroCuliau/InfraRed_Remote_Controller_and_Temperature_Measurements_with_Arduino/issues) section you can watch what we are planning to do next in the various parts of the project.
+
+
+###MQTT 
+
+We worked all this time using *HTTP* requests to comunicate to the online DB. Doing further research, we found out that the most wide spreaded way of connecting many devices with the internet was [***MQTT***](https://en.wikipedia.org/wiki/MQTT). The protocol basically requires three elements a publisher to a topic, a broker and a subscriber to that topic. Nontheless, there was a lot of information to assimilate and took us a while to understand what challenges we were facing. Our first step was to follow [this](https://www.youtube.com/playlist?list=PL2xmtLUbEuglyRtmmbp8S8qO8qa4suPMS) tutorials in order to understand how it worked and to get used to the new tools that are needed. In conclusion, we are certain that MQTT is the ultimate protocol to implement in a microcontroller due to its several advantages in speed and portability.
