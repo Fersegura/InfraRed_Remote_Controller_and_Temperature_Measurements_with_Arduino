@@ -2,8 +2,6 @@ import paho.mqtt.client as mqtt
 import sys
 import pymysql.cursors
 
-global connection
-
 """
     Funcion para conectarnos a la base de datos de forma remota.
     @return: connection= ojeto de pymysql que permite conectarse a la BD
@@ -45,15 +43,36 @@ def on_connect(client, userdata, flags, rc):
 """
 def on_message(client, userdata, msg):
     print(msg.topic+" "+str(msg.payload))
-    lista = msg.topic.split("/")
+    topico = msg.topic.split("/")   # Devuelve una lista el split
+    print(topico)
 
-    sql = "" # COMPLETAR CON SQL VALIDO
+    if(topico[1] == "prueba1"):
+        
+        sql = "INSERT INTO `usuarios` (`id`, `usuario`, `password`, `mail`) VALUES (NULL, 'Prueba1', 'Prueba1', 'Prueba1')" # COMPLETAR CON SQL VALIDO
+        
+        with connection.cursor() as cursor:        
+            try:
+                cursor.execute(sql,)
+                print("Guardando en base de datos...OK")
+            except:
+                print("Guardando en base de datos...Falló")
+            
+        # Hay que hacer un commit para que se impacten los cambios
+        connection.commit()
+        return
 
-    try:
-        # Ejecutar un comando SQL
-        print("Guardando en base de datos...OK")
-    except:
-        print("Guardando en base de datos...Falló")
+    elif(topico[1] == "prueba2"):
+
+        with connection.cursor() as cursor:
+            sql = "SELECT * FROM `usuarios`"
+            cursor.execute(sql,  )
+            result = cursor.fetchall()
+            print(result)
+        return
+
+
+
+
 
 """
     Funcion para conectarse al broker MQTT:
