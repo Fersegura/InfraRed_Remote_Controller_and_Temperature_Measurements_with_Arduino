@@ -46,7 +46,7 @@ def on_message(client, userdata, msg):
     topico = msg.topic.split("/")   # Devuelve una lista el split
     print(topico)
 
-    if(topico[1] == "prueba1"):
+    if topico[1] == "prueba1":
         
         sql = "INSERT INTO `usuarios` (`id`, `usuario`, `password`, `mail`) VALUES (NULL, 'Prueba1', 'Prueba1', 'Prueba1')" # COMPLETAR CON SQL VALIDO
         
@@ -61,7 +61,7 @@ def on_message(client, userdata, msg):
         connection.commit()
         return
 
-    elif(topico[1] == "prueba2"):
+    elif topico[1] == "prueba2":
 
         with connection.cursor() as cursor:
             sql = "SELECT * FROM `usuarios`"
@@ -69,11 +69,11 @@ def on_message(client, userdata, msg):
             result = cursor.fetchall()
             print(result)
         return
-
-
-
-
-
+    
+    else:
+        print("TOPICO DESCONOCIDO")
+        return
+        
 """
     Funcion para conectarse al broker MQTT:
     @return: objeto client de MQTT
@@ -99,7 +99,6 @@ if(__name__ == "__main__"):
 
     client = conectarse_mqtt()
     connection = conectarse_bd()
-
 
     # Credenciales del usuario del broker
     client.username_pw_set("pdmlO2qrY6s8h7y", "m1bGUlqz27SMsmX") 
