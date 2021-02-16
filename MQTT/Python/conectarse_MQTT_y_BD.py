@@ -105,6 +105,7 @@ if(__name__ == "__main__"):
     client.username_pw_set("pdmlO2qrY6s8h7y", "m1bGUlqz27SMsmX") 
 
     try:
+        # INVESTIGAR LOS TIPOS DE LOOP QUE HAY (xej LOS NO BLOQUEANTES)
         client.loop_forever()
     except KeyboardInterrupt:  #precionar Crtl + C para salir
         print("Cerrando...")
