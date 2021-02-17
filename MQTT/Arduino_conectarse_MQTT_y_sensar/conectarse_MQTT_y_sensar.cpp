@@ -120,27 +120,24 @@ void setup()
 	EEPROM.begin(512);							//Para poder usar la memoria EEPROM se inicia (valor maximo es de 4096 Bytes)
 	recuperarEEPROM(); 							//Apenas iniciamos buscamos si habia alguna red guardada por el caso que se corte la luz
 	if(conexion.Conectarse)	conectarseAWifi();	//Si encontramos redes guardadas nos conectamos.
-	else
-	{
-		Serial.println();
-		Serial.print("Estableciendo configuración Soft-AP... ");
-		Serial.println(WiFi.softAPConfig(local_IP, gateway, subnet) ? "Listo" : "Falló!");
-		Serial.print("Configurando soft-AP ... \n");
-	}
-
+	
+	Serial.println();
+	Serial.print("Estableciendo configuración Soft-AP... ");
+	Serial.println(WiFi.softAPConfig(local_IP, gateway, subnet) ? "Listo" : "Falló!");
+	Serial.print("Configurando soft-AP ... \n");
 	
 	WiFi.softAP(ssid , pass);					//Arrancamos la generacion de wifi de red local del dispositivo que permite configurarlo
 	server.begin();								//Iniciamos el servidor
 
 	// ------------ Resto de setup necesario para el funcionamiento del dispositivo. ------------------------------
 	
-    configPines();			// Se inicializan los pines
-    configInterrupciones(); // Se setean las interrupciones
+    	configPines();			// Se inicializan los pines
+    	configInterrupciones(); // Se setean las interrupciones
 
-	// ------------ Conexion MQTT ----------------------------------------------------------------------------------
-
+	// ========== Seteo MQTT ======================================================================
 	clientMQTT.setServer(mqtt_server, 1883);
   	clientMQTT.setCallback(callback);
+	// ======================================================================
 
 }
 
@@ -687,7 +684,7 @@ void actualizarDatos()
 	clientMQTT.publish(topico_botones, msg);
 }
 
-// =========== FUNCIONES PARA QUE FUNCIONE MQTT
+// =========== FUNCIONES PARA QUE FUNCIONE MQTT ======================================================================
 
 void callback(char* topic, byte* payload, unsigned int length) 
 {
