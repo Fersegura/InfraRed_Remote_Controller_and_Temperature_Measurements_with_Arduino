@@ -45,6 +45,7 @@ const char *mqtt_user = "pdmlO2qrY6s8h7y";
 const char *mqtt_pass = "m1bGUlqz27SMsmX";
 const char *topico_temyhum = "KMb6809yr8FThW1/99999/temyhum";
 const char *topico_botones = "KMb6809yr8FThW1/99999/botones";
+const char *topico_suscripcion_botones = "KMb6809yr8FThW1/python/consultabotones/99999";
 
 WiFiClient clientWiFi;
 PubSubClient clientMQTT(clientWiFi);
@@ -702,26 +703,26 @@ void callback(char* topic, byte* payload, unsigned int length)
 
 void reconnect() 
 {
-	// Loop until we're reconnected
+	// Se loopea hasta conectar
 	while (!clientMQTT.connected()) 
 	{
-		Serial.print("Attempting MQTT connection...");
-		// Create a random client ID
-		String clientId = "ESP8266Client-";
+		Serial.print("Intentando conexión MQTT...");
+		// Se crea un cliente random para conectarse al broker
+		String clientId = "ESP8266Client-" + String(ID_SERIAL);
 		clientId += String(random(0xffff), HEX);
-		// Attempt to connect
+		// Intenta conectarse con las credenciales
 		if (clientMQTT.connect(clientId.c_str(),mqtt_user,mqtt_pass)) 
 		{
-		Serial.println("connected");
-		// Once connected, publish an announcement...
+		Serial.println("Conectado con exito!!");
+		// Para debugging 
 		clientMQTT.publish("KMb6809yr8FThW1/outTopic", "hello world");
-		// ... and resubscribe
+		// Se vuelve a suscribir a todo lo que haga falta escuchar
 		clientMQTT.subscribe("KMb6809yr8FThW1/inTopic");
+		clientMQTT.subscribe(topico_suscripcion_botones);
 		} else {
-		Serial.print("failed, rc=");
+		Serial.print("Fallo al conectar, rc=");
 		Serial.print(clientMQTT.state());
-		Serial.println(" try again in 5 seconds");
-		// Wait 5 seconds before retrying
+		Serial.println(" intentando nuevamente en 5 segundos");
 		delay(5000);
 		}
 	}
