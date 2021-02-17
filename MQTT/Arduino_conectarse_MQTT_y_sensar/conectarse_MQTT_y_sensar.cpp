@@ -43,44 +43,44 @@ struct Condiciones
 const char* mqtt_server = "ioticos.org";
 const char *mqtt_user = "pdmlO2qrY6s8h7y";
 const char *mqtt_pass = "m1bGUlqz27SMsmX";
+const char *topico_temyhum = "KMb6809yr8FThW1/99999/temyhum";
+const char *topico_botones = "KMb6809yr8FThW1/99999/botones";
 
 WiFiClient clientWiFi;
 PubSubClient clientMQTT(clientWiFi);
-unsigned long lastMsg = 0;
 #define MSG_BUFFER_SIZE	(50)
 char msg[MSG_BUFFER_SIZE];
-int value = 0;
-
 // ===================================================================
-
 
 // Variables globales:
 float tempe[20], hume[20]; 
 String temp, hum, postData;
-IPAddress local_IP(192,168,4,22); // IP a la que se tiene que conectar el usuario para conectar el dispositivo a su red WiFi
+IPAddress local_IP(192,168,4,22); 	// IP a la que se tiene que conectar el usuario para conectar el dispositivo a su red WiFi
 IPAddress gateway(192,168,4,9);
 IPAddress subnet(255,255,255,0);
-String ssid = "peinito";          // SSID de la red wifi que generara el dispositivo (cuando este en modo AP).
-String pass = "0123456789";       // Contraseña de dicha red.
+String ssid = "peinito";          	// SSID de la red wifi que generara el dispositivo (cuando este en modo AP).
+String pass = "0123456789";       	// Contraseña de dicha red.
 String header;	
-String redes[15];                 // Arreglo que guarda hasta 15 redes.
-int cantidadredes = 0;			  		// Cantidad de redes encontradas.
-String datos;					  		      // Para almacenar la informacion devuelta por el cliente. 
-const int ID_SERIAL=99999;				// N° Serial del dispositivo.
+String redes[15]; 	                // Arreglo que guarda hasta 15 redes.
+int cantidadredes = 0;				// Cantidad de redes encontradas.
+String datos;					  	// Para almacenar la informacion devuelta por el cliente. 
+const int ID_SERIAL=99999;			// N° Serial del dispositivo.
 unsigned long currentTime = millis(); 	// Tiempo actual.
 unsigned long previousTime = 0;       	// Tiempo anterior.
 const long timeoutTime = 2000;        	// Se define un timeout en milisegundos (example: 2000ms = 2s).
 WiFiServer server(80);
-Condiciones conexion;					      // Es la estructura que guarda todos los parámetros de conexción
+Condiciones conexion;				// Es la estructura que guarda todos los parámetros de conexción
 int receivedNum1,receivedNum2,receivedNum3,receivedNum4,receivedNum5;	// Variables recibidas desde la pag. web
 String text_1;
-double millisactuales,anteriores;		// Para cancelar el rebote de los botones en el ISR
-boolean rel1=false;					  	    // Almacena estado actual de los reles
+double millisactuales,anteriores;	// Para cancelar el rebote de los botones en el ISR
+boolean rel1=false;					// Almacena estado actual de los reles
 boolean rel2=false;
 boolean rel3=false;
 boolean rel4=false;
 boolean flag_actualizar;
 boolean flag_enviarDatos;
+
+
 
 // Prototipos de funciones:
 void configPines();
@@ -103,7 +103,7 @@ void callback(char* , byte* , unsigned int );
 void reconnect();
 // =======================================================================
 
-// Es necesario que sea de tipo "ICACHE_RAM_ATTR" la interrupcion para que funcione correctamente
+// Es necesario que sea de t ipo "ICACHE_RAM_ATTR" la interrupcion para que funcione correctamente
 ICACHE_RAM_ATTR void ISRbotones();
 ICACHE_RAM_ATTR void ISRtimer1();
 
@@ -157,18 +157,7 @@ void loop()
 	}
 	
 	clientMQTT.loop();
-
-	unsigned long now = millis();
-	if (now - lastMsg > 2000) 
-	{
-		lastMsg = now;
-		++value;
-		snprintf (msg, MSG_BUFFER_SIZE, "hello world #%ld", value);
-		Serial.print("Publish message: ");
-		Serial.println(msg);
-		clientMQTT.publish("KMb6809yr8FThW1/outTopic", msg);
-	}
-	// ================================= Aca termina la parte del MQTT ============================================
+	// ================================= Aca termina la parte del MQTT =============================
 
 	if(conexion.Conectarse)
 	{
@@ -458,7 +447,11 @@ void transmitirDatos()
 		tempsend=tempsend/20;
 		humsend=humsend/20;
 
-		// ELIMINE TODO LO DEL ENVIO HTTP, HAY QUE HACER LA PUBLICACION MQTT 
+		// Se construye el mensaje a mandar y se lo transforma a charArray y se lo guarda en el buffer 'msg'
+		postData = String(tempsend) + "/" + String(humsend);
+		postData.toCharArray(msg, MSG_BUFFER_SIZE);
+		// Se publica el mensaje en el topico indicado
+		clientMQTT.publish(topico_temyhum, msg);
 		
 	}
 	else	// Si no tome 20 valores todavia, incremento el indice
@@ -687,29 +680,24 @@ void desconectarWifi()
 
 void actualizarDatos()
 {
-	// ELIMINE TODO DEL REQUEST HTTP
+	postData =String(rel1) + "/" + String(rel2) + "/" + String(rel3) +"/" + String(rel4);
+	postData.toCharArray(msg, MSG_BUFFER_SIZE);
+	// Se publica el mensaje en el topico indicado
+	clientMQTT.publish(topico_botones, msg);
 }
 
 // =========== FUNCIONES PARA QUE FUNCIONE MQTT
 
 void callback(char* topic, byte* payload, unsigned int length) 
 {
-	Serial.print("Message arrived [");
+	Serial.print("Mensaje recibido [");
 	Serial.print(topic);
 	Serial.print("] ");
-	for (int i = 0; i < length; i++) {
+	for (unsigned int i = 0; i < length; i++) {
 		Serial.print((char)payload[i]);
 	}
 	Serial.println();
 
-	// Switch on the LED if an 1 was received as first character
-	if ((char)payload[0] == '1') {
-		digitalWrite(LED_BUILTIN, LOW);   // Turn the LED on (Note that LOW is the voltage level
-		// but actually the LED is on; this is because
-		// it is active low on the ESP-01)
-	} else {
-		digitalWrite(LED_BUILTIN, HIGH);  // Turn the LED off by making the voltage HIGH
-	}
 }
 
 void reconnect() 
