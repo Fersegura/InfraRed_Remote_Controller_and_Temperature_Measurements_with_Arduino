@@ -44,7 +44,8 @@ const char* mqtt_server = "ioticos.org";
 const char *mqtt_user = "pdmlO2qrY6s8h7y";
 const char *mqtt_pass = "m1bGUlqz27SMsmX";
 const char *topico_temyhum = "KMb6809yr8FThW1/99999/temyhum";
-const char *topico_botones = "KMb6809yr8FThW1/99999/botones";
+const char *topico_botones = "KMb6809yr8FThW1/99999/actualizarbotones";
+const char *topico_consultabotones = "KMb6809yr8FThW1/99999/consultabotones";
 const char *topico_suscripcion_botones = "KMb6809yr8FThW1/python/consultabotones/99999";
 
 WiFiClient clientWiFi;
@@ -168,6 +169,7 @@ void loop()
 			delay(1500);	// ESTE DELAY HAY QUE DEJARLO????????? DE DONDE SALIO????
 		}
 		else{
+			// NO HAY QUE HACERLO MAS POR POLLING !!!!!!!
 			buscardatos();
 		}
 	}
@@ -486,9 +488,20 @@ String leer(int addr)
 	return strlectura;
 }
 
+// En un principio buscardatos() esta de mas, porque ya no hace falta hacer
+// polling... Cuando el python postee en (root/python/consultabotones/99999)
+// por la forma de funcionar el protocolo MQTT se va a enterar solo el ESP xq
+// está suscripto al topico de python... Lo que haria falta es que en el php se
+// publique sobre un topico estilo: root/web/consultabotones/99999 y que el python
+// al estar subscriopto a ese topico de web publique el estado de los botones 
 void buscardatos()
 {
 	// ELIMINE TODO LO DEL REQUEST HTTP Y analizardatos()... HABRIA QUE HACERLO CON MQTT
+	// Se construye el mensaje a mandar y se lo transforma a charArray y se lo guarda en el buffer 'msg'
+	postData = "En este publilsh no tiene interes el payload";
+	postData.toCharArray(msg, MSG_BUFFER_SIZE);
+	// Se publica el mensaje en el topico indicado
+	clientMQTT.publish(topico_consultabotones, msg);
 	return;
 }
 
@@ -684,6 +697,7 @@ void actualizarDatos()
 
 void callback(char* topic, byte* payload, unsigned int length) 
 {
+	// Para debugging:
 	Serial.print("Mensaje recibido [");
 	Serial.print(topic);
 	Serial.print("] ");
@@ -691,7 +705,16 @@ void callback(char* topic, byte* payload, unsigned int length)
 		Serial.print((char)payload[i]);
 	}
 	Serial.println();
+	// --------------------------------------
 
+	if (strcmp(topic,topico_suscripcion_botones) == 0)
+	{
+		// Aca se completa con algoritmo de parseo del mensaje de vuelta (quizas llamar a analizar datos)
+	}
+	// else if (strcmp(topic,) == 0)
+	// {
+	// 	// Aca se completa con algoritmo de parseo del mensaje de vuelta (quizas llamar a analizar datos)
+	// }
 }
 
 void reconnect() 
