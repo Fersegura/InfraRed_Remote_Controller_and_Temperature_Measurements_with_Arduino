@@ -16,6 +16,7 @@ In this repository you will find example codes and tests codes we have developed
 8. [Improvements to the ESP8266 algorithm](#improvements-to-the-esp8266-algorithm)
 9. [Future modifications](#future-modifications)
 10. [MQTT](#mqtt)
+11. [Hardware design](#hardware-design)
 
 ### IR Remote Controller
 
@@ -136,3 +137,20 @@ We worked all this time using *HTTP* requests to comunicate to the online DB. Do
 When the MQTT protocol was implemented, we experimented several issues (the microcontroller crashed every now and then). We figured out that was due to the buttons connected to the D3, D4 and D8 pins. The logic was only correct for the D8 pin, because it has a pull down internal resistor (D3 and D4 have both internal pull up resistors). To solve the problem we intverted the physical logic of the buttons connected to D3 and D4 (they are now buttons with pull up resistors). 
 
 ![Diagrama de resistencias](https://i.ytimg.com/vi/_XoEHZrsc0U/maxresdefault.jpg)
+
+
+### Hardware design
+
+To enhance the project and make a real device, we decided to design the *PCB* (Printed Circuit Board). We design it in a way that the microcontroller can be taken away for other projects, to give the user an extra level of freedom.
+
+This is the electrical diagram:
+
+![Diagrama Electrico](https://github.com/Fersegura/InfraRed_Remote_Controller_and_Temperature_Measurements_with_Arduino/blob/main/img/Esquematico%20IOT-RSA.png)
+
+This is the routing of the circuit in the PCB:
+
+![Pistas RSA-IOT](https://github.com/Fersegura/InfraRed_Remote_Controller_and_Temperature_Measurements_with_Arduino/blob/main/img/PISTAS%20IOT-RSA.png)
+
+And finally here is the 3D model, we are looking forward to sending a few pieces into production so we can build some prototypes:
+
+![3D RSA-IOT](https://github.com/Fersegura/InfraRed_Remote_Controller_and_Temperature_Measurements_with_Arduino/blob/main/img/3D%20IOT-RSA.png)
