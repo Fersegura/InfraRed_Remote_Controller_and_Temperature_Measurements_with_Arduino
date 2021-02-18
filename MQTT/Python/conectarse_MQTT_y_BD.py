@@ -9,11 +9,12 @@ import time # Para tener el tiempo en UNIX para guardar en la BD
 """
 def conectarse_bd():
     try:
-        connection = pymysql.connect(host='freedb.tech',
-                                user='freedbtech_santiyfer',
-                                password='QF92azHKY@2gFm7',
-                                database='freedbtech_RSA_IOT',
+        connection = pymysql.connect(host='remotemysql.com',
+                                user='C4gd1lgeA2',
+                                password='mUngxZTVJj',
+                                database='C4gd1lgeA2',
                                 charset='utf8mb4',
+                                # port="3306", 
                                 cursorclass=pymysql.cursors.DictCursor)
         print("Si se pudo conectar a la base de datos...")
         return connection
@@ -72,8 +73,8 @@ def conectarse_mqtt():
     client.on_message = on_message
     client.message_callback_add(sub="KMb6809yr8FThW1/python/#", callback=ignorar)
     client.message_callback_add(sub="KMb6809yr8FThW1/+/temyhum", callback=temyhum)
-    client.message_callback_add(sub="KMb6809yr8FThW1/+/botones", callback=botones)
-    client.message_callback_add(sub="KMb6809yr8FThW1/+/consultabotones", callback=consultabotones)
+    client.message_callback_add(sub="KMb6809yr8FThW1/+/actualizarbotones", callback=actualizarbotones)
+    client.message_callback_add(sub="KMb6809yr8FThW1/+/consultabotones/#", callback=consultabotones)
 
     try:
         client.connect(host="ioticos.org", port=1883, keepalive=60) #COMPLETAR CON LOS DATOS DE NUESTRO BROKER
@@ -111,17 +112,25 @@ def temyhum(client, userdata, msg):
     return
 
 """
-    Funcion de callback para el topico botones.
+    Funcion de callback para el topico actualizar botones.
     Debe cambiar el estado de los botones en la BD.
 """
-def botones(client, userdata, msg):
+def actualizarbotones(client, userdata, msg):
     topico = msg.topic.split("/")   
-    origen = topico[1]             
+    origen = topico[1]
+
     mensaje = msg.payload.decode("utf-8")
     mensaje = mensaje.split("/")
     boton1, boton2, boton3, boton4 = mensaje[0], mensaje[1], mensaje[2], mensaje[3]
 
-    sql = "UPDATE `ESPtable2` SET `RECEIVED_BOOL1`='" + boton1 + "',`RECEIVED_BOOL2`='" + boton2 + "',`RECEIVED_BOOL3`='" + boton3 + "',`RECEIVED_BOOL4`='" + boton4 + "' WHERE `id`='" + origen + "'"
+
+    # Implementacion de prueba !!!!
+    if origen == "web":
+        destinatario = topico[3]    # Es el id_serial de la placa que hay que actualizar los botones
+        sql = "UPDATE `ESPtable2` SET `RECEIVED_BOOL1`='" + boton1 + "',`RECEIVED_BOOL2`='" + boton2 + "',`RECEIVED_BOOL3`='" + boton3 + "',`RECEIVED_BOOL4`='" + boton4 + "' WHERE `id`='" + destinatario + "'"
+    else:
+        sql = "UPDATE `ESPtable2` SET `RECEIVED_BOOL1`='" + boton1 + "',`RECEIVED_BOOL2`='" + boton2 + "',`RECEIVED_BOOL3`='" + boton3 + "',`RECEIVED_BOOL4`='" + boton4 + "' WHERE `id`='" + origen + "'"
+    # =============================
 
     with connection.cursor() as cursor:        
         try:
@@ -141,11 +150,9 @@ def botones(client, userdata, msg):
 def consultabotones(client, userdata, msg):
     topico = msg.topic.split("/")   
     origen = topico[1]
+    destinatario = topico[3]    # Desde le PHP se deberia publicar a un topico roon/web/consultabotones/99999
 
-    # if(origen == "python")  # Para ignorar los mensajes que salen de aca mismo
-    #     return
-
-    sql = "SELECT `RECEIVED_BOOL1`, `RECEIVED_BOOL2`, `RECEIVED_BOOL3`, `RECEIVED_BOOL4` FROM `ESPtable2` WHERE `id`='" + origen + "'"             
+    sql = "SELECT `RECEIVED_BOOL1`, `RECEIVED_BOOL2`, `RECEIVED_BOOL3`, `RECEIVED_BOOL4` FROM `ESPtable2` WHERE `id`='" + destinatario + "'"             
 
     with connection.cursor() as cursor:
         cursor.execute(sql,  )
@@ -156,7 +163,7 @@ def consultabotones(client, userdata, msg):
     boton1, boton2, boton3, boton4 = result[0]['RECEIVED_BOOL1'], result[0]['RECEIVED_BOOL2'], result[0]['RECEIVED_BOOL3'], result[0]['RECEIVED_BOOL4']
     
     payload = str(boton1)+"/"+str(boton2)+"/"+str(boton3)+"/"+str(boton4)
-    topic="KMb6809yr8FThW1/python/consultabotones/"+origen
+    topic="KMb6809yr8FThW1/python/consultabotones/"+destinatario
 
     client.publish(topic=topic, payload=payload, qos=0, retain=False)
 
