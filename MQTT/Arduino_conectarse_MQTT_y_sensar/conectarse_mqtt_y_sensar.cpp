@@ -39,7 +39,7 @@ struct Condiciones
 };
 
 // ====================== PARTE DEL MQTT =================================
-// Update these with values suitable for your network.
+//Parametros del broker MQTT
 const char* mqtt_server = "ioticos.org";
 const char *mqtt_user = "pdmlO2qrY6s8h7y";
 const char *mqtt_pass = "m1bGUlqz27SMsmX";
@@ -111,6 +111,10 @@ ICACHE_RAM_ATTR void ISRtimer1();
 void setup() 
 {	
 	Serial.begin(115200);						//Se inicializa el monitor serial con un baudaje de 115200
+	// ========== Seteo MQTT ======================================================================
+	clientMQTT.setServer(mqtt_server, 1883);
+  	clientMQTT.setCallback(callback);
+	// ======================================================================
 		
 	// ------------ Conexion del WiFi y generacion de red propia o conexion a red guardada. -----------------------
 
@@ -118,8 +122,10 @@ void setup()
 	
 	EEPROM.begin(512);							//Para poder usar la memoria EEPROM se inicia (valor maximo es de 4096 Bytes)
 	recuperarEEPROM(); 							//Apenas iniciamos buscamos si habia alguna red guardada por el caso que se corte la luz
-	if(conexion.Conectarse)	conectarseAWifi();	//Si encontramos redes guardadas nos conectamos.
-	
+	if(conexion.Conectarse)	{					//Si encontramos redes guardadas nos conectamos al wifi y al broker MQTT
+		conectarseAWifi();
+		reconnect();
+	}
 	Serial.println();
 	Serial.print("Estableciendo configuración Soft-AP... ");
 	Serial.println(WiFi.softAPConfig(local_IP, gateway, subnet) ? "Listo" : "Falló!");
@@ -131,12 +137,10 @@ void setup()
 	// ------------ Resto de setup necesario para el funcionamiento del dispositivo. ------------------------------
 	
     configPines();			// Se inicializan los pines
+	buscardatos();
     configInterrupciones(); // Se setean las interrupciones
 
-	// ========== Seteo MQTT ======================================================================
-	clientMQTT.setServer(mqtt_server, 1883);
-  	clientMQTT.setCallback(callback);
-	// ======================================================================
+	
 
 }
 
@@ -147,31 +151,21 @@ void loop()
 	guardarRedes(cantidadredes);
 	seleccionarRedWifi();
 
-	// ================================= Parte copiada del ejemplo de MQTT ========================
-	if (!clientMQTT.connected()) 
-	{
-		reconnect();
-	}
-	
-	clientMQTT.loop();
-	// ================================= Aca termina la parte del MQTT =============================
-
 	if(conexion.Conectarse)
 	{
+		// ================================= Parte copiada del ejemplo de MQTT ========================
+		reconnect();
+		clientMQTT.loop();   //esta atento a que lleguen nuevos mensajes del broker
 		if(flag_enviarDatos){
 			flag_enviarDatos=false;
 			transmitirDatos();
 		}
 		
-		if(flag_actualizar){
+		if(flag_actualizar){   //si cambiamos los valores de los reles en forma manual se manda la info para modificar la base de datos.
 			flag_actualizar=false;
 			actualizarDatos();
-			delay(1500);	// ESTE DELAY HAY QUE DEJARLO????????? DE DONDE SALIO????
-		}
-		else{
-			// NO HAY QUE HACERLO MAS POR POLLING !!!!!!!
-			buscardatos();
-		}
+					}
+		
 	}
 }
 
@@ -427,7 +421,8 @@ void transmitirDatos()
 
 	tempe[index]=t;
 	hume[index]=h;
-	
+	//imprimimos el index ----------->TESTEO<-----------------------
+	Serial.println(index);
 	// Si ya tome 20 valores, reinicio el indice y promedio y envio los datos sensados
 	if(index==19)	
 	{
@@ -444,7 +439,7 @@ void transmitirDatos()
 
 		tempsend=tempsend/20;
 		humsend=humsend/20;
-
+		reconnect();
 		// Se construye el mensaje a mandar y se lo transforma a charArray y se lo guarda en el buffer 'msg'
 		postData = String(tempsend) + "/" + String(humsend);
 		postData.toCharArray(msg, MSG_BUFFER_SIZE);
@@ -488,17 +483,11 @@ String leer(int addr)
 	return strlectura;
 }
 
-// En un principio buscardatos() esta de mas, porque ya no hace falta hacer
-// polling... Cuando el python postee en (root/python/consultabotones/99999)
-// por la forma de funcionar el protocolo MQTT se va a enterar solo el ESP xq
-// está suscripto al topico de python... Lo que haria falta es que en el php se
-// publique sobre un topico estilo: root/web/consultabotones/99999 y que el python
-// al estar subscriopto a ese topico de web publique el estado de los botones 
-void buscardatos()
+
+void buscardatos()    			//Esta función es para chequear los valores de los reles almacenados en la base de datos, solo se debe consultar cuando se reincia el dispositivo o se conecta a internet
 {
-	// ELIMINE TODO LO DEL REQUEST HTTP Y analizardatos()... HABRIA QUE HACERLO CON MQTT
-	// Se construye el mensaje a mandar y se lo transforma a charArray y se lo guarda en el buffer 'msg'
-	postData = "En este publilsh no tiene interes el payload";
+	reconnect();	
+	postData = "El dispositivo se inicio";   //el mensaje es meramente de debugeo
 	postData.toCharArray(msg, MSG_BUFFER_SIZE);
 	// Se publica el mensaje en el topico indicado
 	clientMQTT.publish(topico_consultabotones, msg);
@@ -687,6 +676,7 @@ void desconectarWifi()
 
 void actualizarDatos()
 {
+	reconnect();
 	postData =String(rel1) + "/" + String(rel2) + "/" + String(rel3) +"/" + String(rel4);
 	postData.toCharArray(msg, MSG_BUFFER_SIZE);
 	// Se publica el mensaje en el topico indicado
@@ -720,6 +710,7 @@ void callback(char* topic, byte* payload, unsigned int length)
 void reconnect() 
 {
 	// Se loopea hasta conectar
+	if(clientMQTT.connected()) return;
 	while (!clientMQTT.connected()) 
 	{
 		Serial.print("Intentando conexión MQTT...");
@@ -731,7 +722,7 @@ void reconnect()
 		{
 		Serial.println("Conectado con exito!!");
 		// Para debugging 
-		clientMQTT.publish("KMb6809yr8FThW1/outTopic", "hello world");
+		clientMQTT.publish("KMb6809yr8FThW1/outTopic", "hello world");  
 		// Se vuelve a suscribir a todo lo que haga falta escuchar
 		clientMQTT.subscribe("KMb6809yr8FThW1/inTopic");
 		clientMQTT.subscribe(topico_suscripcion_botones);
@@ -743,4 +734,3 @@ void reconnect()
 		}
 	}
 }
-
