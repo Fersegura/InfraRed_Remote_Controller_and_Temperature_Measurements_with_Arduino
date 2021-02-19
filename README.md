@@ -52,7 +52,7 @@ We follow [this tutorial](https://www.youtube.com/watch?v=hlmSF9xNARU&ab_channel
 
 We devoted some time to investigate how to make the Arduino consume less current than the regular 20-70 [mA] (we measure that current in *idle* mode and the measurments correspond to Arduino Uno and Mega with ATMega2560 respectively).
 
-We measure the current consumption using a multimeter in series with the power source. The cables were connected trhough one board to the 5V and GND pins of the board being measured in order to conect the multimeter properly.
+We measure the current consumption using a multimeter in series with the power source. The wires were connected trhough one board to the 5V and GND pins of the board being measured in order to conect the multimeter properly.
 
 The first thing we noticed was that using the *Vin* pin rather than the *5V* pin inmediately brought down the current from 20 [mA] to 12 [mA] as explained in [this video](https://www.youtube.com/watch?v=usKaGRzwIMI). Afterward we use the clock divider in *CLKPR* register to slow down the clock. We saw significant changes in current consumption when the clock was up to 4 [MHz], with slower clocks our measurements did not show significant changes (it remained near 5 [mA]). 
 
