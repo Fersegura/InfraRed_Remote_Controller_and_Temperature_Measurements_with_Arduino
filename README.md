@@ -109,6 +109,8 @@ All the user configuration (selecting the correct network (*SSID*) and introduci
 
 In order to make a more professional website, we decided to implement a user managment system. The users now only have access to the index page without logging in. If the user wants to visit the other pages it has to either log in or register as a new user. The system is a bit rudimentary for the moment but we are looking forward adding more and better features (as for example logging in with G+ or Facebook).
 
+Also, we added different pages where the user can check a daily evolution of the temperature and humidity, a monthly evolution or a historic evolution of the variables. In the last page we developed so far, the user can request an evolution report of the variables between two dates he defines.
+ 
 
 ### Improvements to the ESP8266 algorithm
 
