@@ -1,3 +1,5 @@
+//este archivo es el que tenemos como definitivo para la tesis, usando MQTT
+
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
