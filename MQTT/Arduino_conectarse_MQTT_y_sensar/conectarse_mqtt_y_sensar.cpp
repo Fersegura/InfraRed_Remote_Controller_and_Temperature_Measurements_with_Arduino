@@ -140,8 +140,6 @@ void setup()
 	buscardatos();
     configInterrupciones(); // Se setean las interrupciones
 
-	
-
 }
 
 void loop() 
@@ -164,7 +162,7 @@ void loop()
 		if(flag_actualizar){   //si cambiamos los valores de los reles en forma manual se manda la info para modificar la base de datos.
 			flag_actualizar=false;
 			actualizarDatos();
-					}
+        }
 		
 	}
 }
@@ -699,7 +697,28 @@ void callback(char* topic, byte* payload, unsigned int length)
 
 	if (strcmp(topic,topico_suscripcion_botones) == 0)
 	{
-		// Aca se completa con algoritmo de parseo del mensaje de vuelta (quizas llamar a analizar datos)
+		for (unsigned int i = 0; i < length; i++) 
+		{
+			boolean estado= (payload[i]==49);
+			Serial.println(payload[i]);
+			switch (i) 
+			{
+				case 0:
+					digitalWrite(rele1,estado);
+					break;
+				case 2:
+					digitalWrite(rele2,estado);			
+					break;
+				case 4:
+					digitalWrite(rele3,estado);
+					break;
+				case 6:
+					digitalWrite(rele4,estado);			
+						break;
+				default:
+					break;
+			}
+		}
 	}
 	// else if (strcmp(topic,) == 0)
 	// {
