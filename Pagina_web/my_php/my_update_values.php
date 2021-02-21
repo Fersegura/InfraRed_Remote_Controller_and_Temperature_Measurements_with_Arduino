@@ -1,21 +1,23 @@
 <?php
-//This file will get the values when you click any of the ON/OFF buttons or change buttons on the index.php file
-//We get that value and send it to the datapase table and by that update the values
-$value = strip_tags($_POST['value']);		//Get the value
-$unit = strip_tags($_POST['unit']);			//Get the id if the unit where we want to update the value
-$column = strip_tags($_POST['column']);		//Which coulumn of the database, could be the RECEIVED_BOOL1, etc...
+    // Inicio para poder usar variables de sesion
+    session_start();
+	// Conectarse a la BD e incluir lo necesario para hacer un publish MQTT para avisar que se cambio algun dato de la BD
+	require_once("./database_connect.php");
+	require_once('./publish_mqtt.php');
 
-//connect to the database
-include("./database_connect.php"); //We include the database_connect.php which has the data for the connection to the database
+	// Este archivo recibe los valores cuando desde la pagina de enviar datos se cambia algun valor.
+	
+	$value = strip_tags($_POST['value']);		// Valor a cambiar
+	$unit = strip_tags($_POST['unit']);			// id_serial del dispositivo a cambiar el valor 
+	$column = strip_tags($_POST['column']);		// Columna de la BD que hay que cambiar 
+	$id_usuario = $_SESSION['usuario_id'];		// id del dueño de ese dispositivo (por si llega a haber seriales repetidos)
 
-// Check the connection
-if (mysqli_connect_errno()) {
-  echo "Failed to connect to MySQL: " . mysqli_connect_error();
-}
-
-//Now update the value sent from the post (ON/OFF, change or send button)
-mysqli_query($con,"UPDATE `ESPtable2` SET $column = '{$value}' WHERE id=$unit");
-
-//go back to the LTE interface
-header("location: ../pages/UI/my_buttons.php");
+	// Se actualizan los valores de la
+	mysqli_query($con,"UPDATE `ESPtable2` SET $column = '{$value}' WHERE id=$unit AND id_usuario='".$id_usuario."'"); 
+	
+	// Se envía un publish para que el python se entere que cambiaron los valores de la BD y le avise al dispositivo que tenga que ser 
+	$topico = 'web/python/consultabotones';
+	publicar($topico,$unit );
+	// Se vuelve a la pagina de enviar datos
+    echo "<script>window.location.href = '../pages/UI/my_buttons.php';</script>";
 ?>
