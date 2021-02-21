@@ -1,5 +1,3 @@
-//este archivo es el que tenemos como definitivo para la tesis, usando MQTT
-
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
@@ -45,10 +43,10 @@ struct Condiciones
 const char* mqtt_server = "ioticos.org";
 const char *mqtt_user = "pdmlO2qrY6s8h7y";
 const char *mqtt_pass = "m1bGUlqz27SMsmX";
-const char *topico_temyhum = "KMb6809yr8FThW1/99999/temyhum";
-const char *topico_botones = "KMb6809yr8FThW1/99999/actualizarbotones";
-const char *topico_consultabotones = "KMb6809yr8FThW1/99999/consultabotones";
-const char *topico_suscripcion_botones = "KMb6809yr8FThW1/python/consultabotones/99999";
+const char *topico_pub_temyhum = "KMb6809yr8FThW1/99999/BD/temyhum";      				 //mandamos la ultima temperatura y humedad promediada
+const char *topico_pub_botones = "KMb6809yr8FThW1/99999/BD/botones";	 				 //mandamos el ultimo estado de los reles modificados con los botones
+const char *topico_pub_consultabotones = "KMb6809yr8FThW1/99999/BD/consultabotones";  	 //preguntamos como estaban los botones en la BD
+const char *topico_sub_botones = "KMb6809yr8FThW1/python/99999/consultabotones";	 			 //nos subcribimos a todas las fuentes que muestren el estado de los reles
 
 WiFiClient clientWiFi;
 PubSubClient clientMQTT(clientWiFi);
@@ -444,7 +442,7 @@ void transmitirDatos()
 		postData = String(tempsend) + "/" + String(humsend);
 		postData.toCharArray(msg, MSG_BUFFER_SIZE);
 		// Se publica el mensaje en el topico indicado
-		clientMQTT.publish(topico_temyhum, msg);
+		clientMQTT.publish(topico_pub_temyhum, msg);
 		
 	}
 	else	// Si no tome 20 valores todavia, incremento el indice
@@ -490,7 +488,7 @@ void buscardatos()    			//Esta función es para chequear los valores de los rel
 	postData = "El dispositivo se inicio";   //el mensaje es meramente de debugeo
 	postData.toCharArray(msg, MSG_BUFFER_SIZE);
 	// Se publica el mensaje en el topico indicado
-	clientMQTT.publish(topico_consultabotones, msg);
+	clientMQTT.publish(topico_pub_consultabotones, msg);
 	return;
 }
 
@@ -676,11 +674,18 @@ void desconectarWifi()
 
 void actualizarDatos()
 {
+	int datoA,datoB,datoC,datoD;
+	datoA=digitalRead(rele1);
+	datoB=digitalRead(rele2);
+	datoC=digitalRead(rele3);
+	datoD=digitalRead(rele4);
 	reconnect();
-	postData =String(rel1) + "/" + String(rel2) + "/" + String(rel3) +"/" + String(rel4);
+	postData =String(datoA) + "/" + String(datoB) + "/" + String(datoC) +"/" + String(datoD);
+	Serial.println(postData); //LINEA PARA DEBUGEO
 	postData.toCharArray(msg, MSG_BUFFER_SIZE);
+
 	// Se publica el mensaje en el topico indicado
-	clientMQTT.publish(topico_botones, msg);
+	clientMQTT.publish(topico_pub_botones, msg);
 }
 
 // =========== FUNCIONES PARA QUE FUNCIONE MQTT ======================================================================
@@ -697,7 +702,7 @@ void callback(char* topic, byte* payload, unsigned int length)
 	Serial.println();
 	// --------------------------------------
 
-	if (strcmp(topic,topico_suscripcion_botones) == 0)
+	if (strcmp(topic,topico_sub_botones) == 0)
 	{
 		for (unsigned int i = 0; i < length; i++) 
 		{
@@ -746,7 +751,7 @@ void reconnect()
 		clientMQTT.publish("KMb6809yr8FThW1/outTopic", "hello world");  
 		// Se vuelve a suscribir a todo lo que haga falta escuchar
 		clientMQTT.subscribe("KMb6809yr8FThW1/inTopic");
-		clientMQTT.subscribe(topico_suscripcion_botones);
+		clientMQTT.subscribe(topico_sub_botones);
 		} else {
 		Serial.print("Fallo al conectar, rc=");
 		Serial.print(clientMQTT.state());
