@@ -1,53 +1,53 @@
 <?php
 
+  require_once("./database_connect.php");
+  $conn = $con;
 
-
-    $host = "localhost";		         // host = localhost because database hosted on the same server where PHP files are hosted
-    $dbname = "id15900605_esp8266";              // Database name
-    $username = "id15900605_santiyfer";		// Database username
-    $password = "_<F}(%^\Mn+L3}za";	        // Database password
-
-
-// Establish connection to MySQL database
-$conn = new mysqli($host, $username, $password, $dbname);
-
-
-// Check if connection established successfully
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
-else { echo "Connected to mysql database. "; }
-
-   
-// Get date and time variables
+  // Get date and time variables
   $fecha = date_create();
   $d= date_timestamp_get($fecha);
-    
-    
-// If values send by NodeMCU are not empty then insert into MySQL database table
+
+  // If values send by NodeMCU are not empty then insert into MySQL database table
 
   if(!empty($_POST['temp']) && !empty($_POST['hum']) )
+  {
+    $temperatura = strip_tags($_POST['temp']);
+    $humedad = strip_tags($_POST['hum']);
+
+    // Update your tablename here
+    $sql = "INSERT INTO `datos`(`serial`, `fecha`, `temperatura`, `humedad`) VALUES (2,$d,$temperatura,$humedad)"; 
+
+    if ($conn->query($sql) === TRUE) 
     {
-		$temperatura = strip_tags($_POST['temp']);
-        $humedad = strip_tags($_POST['hum']);
+        echo "Values inserted in MySQL database table.";
+    } else 
+    {
+        echo "Error: " . $sql . "<br>" . $conn->error;
+    }
+  }
+  
+  if(!empty($_POST['rele1']) && !empty($_POST['rele2']) && !empty($_POST['rele3']) && !empty($_POST['rele4']) && !empty($_POST['id_serial']) )
+  {
+    $rele1 = strip_tags($_POST['rele1']);
+    $rele2 = strip_tags($_POST['rele2']);
+    $rele3 = strip_tags($_POST['rele3']);
+    $rele4 = strip_tags($_POST['rele4']);
+    $id_serial = strip_tags($_POST['id_serial']);
+
+    $sql = "UPDATE `ESPtable2` SET `RECEIVED_BOOL1`=$rele1,`RECEIVED_BOOL2`=$rele2,`RECEIVED_BOOL3`=$rele3,`RECEIVED_BOOL4`=$rele4 WHERE `id`=$id_serial"; 
+    
+    if ($conn->query($sql) === TRUE) 
+    {
+        echo "Values inserted in MySQL database table.";
+    } else 
+    {
+        echo "Error: " . $sql . "<br>" . $conn->error;
+    }
+  }
 
 
-        // Update your tablename here
-	    $sql = "INSERT INTO `datos`(`serial`, `fecha`, `temperatura`, `humedad`) VALUES (2,$d,$temperatura,$humedad)"; 
- 
-
-
-		if ($conn->query($sql) === TRUE) {
-		    echo "Values inserted in MySQL database table.";
-		} else {
-		    echo "Error: " . $sql . "<br>" . $conn->error;
-		}
-	}
-
-
-// Close MySQL connection
-$conn->close();
+  // Close MySQL connection
+  $conn->close();
 
 
 
