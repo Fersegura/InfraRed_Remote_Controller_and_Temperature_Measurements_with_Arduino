@@ -12,7 +12,7 @@
         echo "Connected to mysql database. "; 
     }
     
-    Si los valores recibidos del NodeMCU no estan vacios, se realiza un query de los valores de la pagina web
+    // Si los valores recibidos del NodeMCU no estan vacios, se realiza un query de los valores de la pagina web
     if(!empty($_POST['id_serial']))
     {
         $id = $_POST['id_serial'];
