@@ -14,9 +14,9 @@ In this repository you will find example codes and tests codes we have developed
 6. [Connecting ESP8266 to the internet](#connecting-esp8266-to-the-internet)
 7. [Going beyond with the website](#going-beyond-with-the-website)
 8. [Improvements to the ESP8266 algorithm](#improvements-to-the-esp8266-algorithm)
-9. [Future modifications](#future-modifications)
-10. [MQTT](#mqtt)
-11. [Hardware design](#hardware-design)
+9. [MQTT](#mqtt)
+10. [Hardware design](#hardware-design)
+11. [Future modifications](#future-modifications)
 
 ### IR Remote Controller
 
@@ -127,18 +127,15 @@ Finally, we researched how to use timer interrupts. We did not find very useful 
 The WiFi connection uses the ESP8266 *timer 0*, so there is only one timer to freely use (*timer 1*). We will try our best to implement the sensing function with timer1. However, we feel confindent about the *Tickers* library as explained [here](https://circuits4you.com/2018/01/02/esp8266-timer-ticker-example/) to deal with "interrupts" in the future or in situations when you have more than one callback function. 
 
 
-### Future modifications
-
-We are always thinking in whats next. In the [***issues***](https://github.com/OtroCuliau/InfraRed_Remote_Controller_and_Temperature_Measurements_with_Arduino/issues) section you can watch what we are planning to do next in the various parts of the project.
-
-
 ### MQTT 
 
-We worked all this time using *HTTP* requests to comunicate to the online DB. Doing further research, we found out that the most wide spreaded way of connecting many devices with the internet was [***MQTT***](https://en.wikipedia.org/wiki/MQTT). The protocol basically requires three elements a publisher to a topic, a broker and a subscriber to that topic. Nontheless, there was a lot of information to assimilate and took us a while to understand what challenges we were facing. Our first step was to follow [this](https://www.youtube.com/playlist?list=PL2xmtLUbEuglyRtmmbp8S8qO8qa4suPMS) tutorials in order to understand how it worked and to get used to the new tools that are needed. In conclusion, we are certain that MQTT is the ultimate protocol to implement in a microcontroller due to its several advantages in speed and portability.
+We worked all this time using *HTTP* requests to comunicate to the online DB. Doing further research, we found out that the most wide spreaded way of connecting many devices with the internet was [***MQTT***](https://en.wikipedia.org/wiki/MQTT). The protocol basically requires three elements a publisher to a topic, a broker and a subscriber to that topic. Nontheless, there was a lot of information to assimilate and took us a while to understand what challenges we were facing. Our first step was to follow [***SinapTec***](https://www.youtube.com/playlist?list=PL2xmtLUbEuglyRtmmbp8S8qO8qa4suPMS) tutorials in order to understand how it worked and to get used to the new tools that are needed. In conclusion, we are certain that MQTT is the ultimate protocol to implement in a microcontroller due to its several advantages in speed and portability.
 
 When the MQTT protocol was implemented, we experimented several issues (the microcontroller crashed every now and then). We figured out that was due to the buttons connected to the D3, D4 and D8 pins. The logic was only correct for the D8 pin, because it has a pull down internal resistor (D3 and D4 have both internal pull up resistors). To solve the problem we intverted the physical logic of the buttons connected to D3 and D4 (they are now buttons with pull up resistors). 
 
 ![Diagrama de resistencias](https://i.ytimg.com/vi/_XoEHZrsc0U/maxresdefault.jpg)
+
+The angular stone of the network is a *Python* script. This script is suscribed to every topic and is responsible of comunicating with the microcontroller, the database and the webpage. It handles all the DB queries (updates, requests, etc...) and publishes the requested information in specific topics.
 
 
 ### Hardware design
@@ -156,3 +153,8 @@ This is the routing of the circuit in the PCB:
 And finally here is the 3D model, we are looking forward to sending a few pieces into production so we can build some prototypes:
 
 ![3D RSA-IOT](https://github.com/Fersegura/InfraRed_Remote_Controller_and_Temperature_Measurements_with_Arduino/blob/main/img/3D%20IOT-RSA.png)
+
+
+### Future modifications
+
+We are always thinking in whats next. In the [***issues***](https://github.com/OtroCuliau/InfraRed_Remote_Controller_and_Temperature_Measurements_with_Arduino/issues) section you can watch what we are planning to do next in the various parts of the project.
