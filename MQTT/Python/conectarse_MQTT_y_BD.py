@@ -47,7 +47,7 @@ def on_message(client, userdata, msg):
     print(msg.topic+" "+str(msg.payload))
     topico = msg.topic.split("/")   # Devuelve una lista el split
     origen = topico[1]              # En nuestra estructura de topicos, despues del root viene quien hizo la publicacion (el origen del publish)
-    destinatario = topico[2]
+
     # if topico[2] == "losacoporelmomento":
 
     #     with connection.cursor() as cursor:
@@ -68,7 +68,7 @@ def on_message(client, userdata, msg):
 """
 def conectarse_mqtt():
     client = mqtt.Client() # REVISAR LOS DISTINTOS ARGUMENTOS QUE PUEDE RECIBIR
-    # Sobrecargamos los callbacks para los distintos casos y topicos
+    # Asignamos los callbacks para los distintos casos y topicos
     client.on_connect = on_connect    #necesito una explicacion de esta parte
     client.on_message = on_message
     client.message_callback_add(sub="KMb6809yr8FThW1/python/#", callback=ignorar)
@@ -77,9 +77,8 @@ def conectarse_mqtt():
     client.message_callback_add(sub="KMb6809yr8FThW1/+/BD/consultabotones", callback=consultabotones)
     client.message_callback_add(sub="KMb6809yr8FThW1/+/python/consultabotones", callback=consultabotones)
 
-    # Se intenta conectar al broker
     try:
-        client.connect(host="ioticos.org", port=1883, keepalive=60)
+        client.connect(host="ioticos.org", port=1883, keepalive=60) #COMPLETAR CON LOS DATOS DE NUESTRO BROKER
         return client
     except:
         print("No se pudo conectar con el Broker MQTT...")
@@ -94,7 +93,6 @@ def temyhum(client, userdata, msg):
     print("se entro a temyhum") #LINEA COMPLETAMENTE PARA DEBUG
     topico = msg.topic.split("/")   # Devuelve una lista el split
     origen = topico[1]              # En nuestra estructura de topicos, despues del root viene quien hizo la publicacion (el origen del publish)
-    destino = topico[2]             # Luego del origen viene el destinatario.
     # Hay que transformar el payload que es de tipo 'byte' a str
     mensaje = msg.payload.decode("utf-8")
     mensaje = mensaje.split("/")
@@ -119,19 +117,23 @@ def temyhum(client, userdata, msg):
     Debe cambiar el estado de los botones en la BD.
 """
 def actualizarbotones(client, userdata, msg):
+    print("se entro a actualizarbotones") #LINEA COMPLETAMENTE PARA DEBUG
     topico = msg.topic.split("/")   
     origen = topico[1]
 
     mensaje = msg.payload.decode("utf-8")
+    print(mensaje)
     mensaje = mensaje.split("/")
     boton1, boton2, boton3, boton4 = mensaje[0], mensaje[1], mensaje[2], mensaje[3]
 
-    # Implementacion de prueba !!!! Se actualiza la BD pero se hace una distincion si el publicador fue la pagWeb o algun ESP8266
+
+    # Implementacion de prueba !!!!
     if origen == "web":
         destinatario = topico[2]    # Es el id_serial de la placa que hay que actualizar los botones
         sql = "UPDATE `ESPtable2` SET `RECEIVED_BOOL1`='" + boton1 + "',`RECEIVED_BOOL2`='" + boton2 + "',`RECEIVED_BOOL3`='" + boton3 + "',`RECEIVED_BOOL4`='" + boton4 + "' WHERE `id`='" + destinatario + "'"
     else:
         sql = "UPDATE `ESPtable2` SET `RECEIVED_BOOL1`='" + boton1 + "',`RECEIVED_BOOL2`='" + boton2 + "',`RECEIVED_BOOL3`='" + boton3 + "',`RECEIVED_BOOL4`='" + boton4 + "' WHERE `id`='" + origen + "'"
+    # =============================
 
     with connection.cursor() as cursor:        
         try:
@@ -140,6 +142,7 @@ def actualizarbotones(client, userdata, msg):
         except:
             print("Guardando en base de datos...Falló")
         
+    # Hay que hacer un commit para que se impacten los cambios
     connection.commit()
     return
 
@@ -148,30 +151,21 @@ def actualizarbotones(client, userdata, msg):
     Debe publicar el estado de los botones del dispositivo que consulta.
 """
 def consultabotones(client, userdata, msg):
-    topico = msg.topic.split("/")
-    origen = topico[1]
-    destino = topico[2]   
-    
-    # No haria falta este if debido a la estructura que usamos en los topicos: root/origen/destino/topico
-    # if (origen=="BD" or origen=="web"):
-    #     destino = msg.payload.decode("utf-8")
-    #     print(destino)
-    # else:
-    #     destino =topico[1]  # Desde le PHP se deberia publicar a un topico root/web/consultabotones/99999  ----->capaz no publicar desde el php solo hacer la consulta y publicar desdel el python
+    print("se entro a consultaboltones") #LINEA COMPLETAMENTE PARA DEBUG
+    topico = msg.topic.split("/")   
+    if (topico[1]=="BD" or topico[1]=="web"):
+        destino = msg.payload.decode("utf-8")
+    else:
+        destino =topico[1]  # Desde le PHP se deberia publicar a un topico roon/web/consultabotones/99999  ----->capaz no publicar desde el php solo hacer la consulta y publicar desdel el python
 
-    # EN UN PRINCIPIO NO FUNCIONARIA CON LA PAGWEB XQ NO LA PUDIMOS HACER SUSCRIPTORA DE MQTT
-    # PENSAR EN AGREGAR LA CONSULTA DEL RESTO DE LA INFORMACION (VALORES INGRESADOS POR EL USUARIO)
-
-    # Cuando el origen es la web:
-    # sql = "SELECT `RECEIVED_BOOL1`, `RECEIVED_BOOL2`, `RECEIVED_BOOL3`, `RECEIVED_BOOL4` FROM `ESPtable2` WHERE `id`='" + destino + "'"             
-    # Cuando el origen es algun ESP8266:
-    sql = "SELECT `RECEIVED_BOOL1`, `RECEIVED_BOOL2`, `RECEIVED_BOOL3`, `RECEIVED_BOOL4` FROM `ESPtable2` WHERE `id`='" + origen + "'"             
+                            
+    sql = "SELECT `RECEIVED_BOOL1`, `RECEIVED_BOOL2`, `RECEIVED_BOOL3`, `RECEIVED_BOOL4` FROM `ESPtable2` WHERE `id`='" + destino + "'"             
 
     with connection.cursor() as cursor:
         cursor.execute(sql,  )
         result = cursor.fetchall()  # Es del tipo lista, y adentro tiene un diccionario, con key=NombreColumna, value=ValorDeLaColumnaEnLaBD
     connection.commit()
-
+    print(result)
     # Parseo el resultado de la busqueda para armar el payload del publish que voy a hacer
     boton1, boton2, boton3, boton4 = result[0]['RECEIVED_BOOL1'], result[0]['RECEIVED_BOOL2'], result[0]['RECEIVED_BOOL3'], result[0]['RECEIVED_BOOL4']
 
