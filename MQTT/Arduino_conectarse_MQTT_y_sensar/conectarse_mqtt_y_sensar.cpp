@@ -492,6 +492,7 @@ void buscardatos()    			//Esta función es para chequear los valores de los rel
 	return;
 }
 
+// ESTA FUNCION NO ESTA SIENDO USADA
 void analizardatos(String aux)
 {    //toma los datos que mandamos a pedir al server y define el estado de los reles y almacena los enteros y el string.
 
