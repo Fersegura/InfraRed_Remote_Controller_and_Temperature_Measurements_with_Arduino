@@ -43,10 +43,13 @@ struct Condiciones
 const char* mqtt_server = "ioticos.org";
 const char *mqtt_user = "pdmlO2qrY6s8h7y";
 const char *mqtt_pass = "m1bGUlqz27SMsmX";
-const char *topico_pub_temyhum = "KMb6809yr8FThW1/99999/BD/temyhum";      				 //mandamos la ultima temperatura y humedad promediada
-const char *topico_pub_botones = "KMb6809yr8FThW1/99999/BD/botones";	 				 //mandamos el ultimo estado de los reles modificados con los botones
-const char *topico_pub_consultabotones = "KMb6809yr8FThW1/99999/BD/consultabotones";  	 //preguntamos como estaban los botones en la BD
-const char *topico_sub_botones = "KMb6809yr8FThW1/python/99999/consultabotones";	 			 //nos subcribimos a todas las fuentes que muestren el estado de los reles
+const char *topico_pub_temyhum = "KMb6809yr8FThW1/88888/BD/temyhum";      				 //mandamos la ultima temperatura y humedad promediada
+const char *topico_pub_botones = "KMb6809yr8FThW1/88888/BD/botones";	 				 //mandamos el ultimo estado de los reles modificados con los botones
+const char *topico_pub_consultabotones = "KMb6809yr8FThW1/88888/BD/consultabotones";  	 //preguntamos como estaban los botones en la BD
+const char *topico_pub_alarma = "KMb6809yr8FThW1/88888/python/trigger_alarma";
+const char *topico_sub_botones = "KMb6809yr8FThW1/python/88888/consultabotones";	 	 //nos subcribimos a todas las fuentes que muestren el estado de los reles
+const char *topico_sub_limites = "KMb6809yr8FThW1/python/88888/get_limites";
+
 
 WiFiClient clientWiFi;
 PubSubClient clientMQTT(clientWiFi);
@@ -66,7 +69,7 @@ String header;
 String redes[15]; 	                // Arreglo que guarda hasta 15 redes.
 int cantidadredes = 0;				// Cantidad de redes encontradas.
 String datos;					  	// Para almacenar la informacion devuelta por el cliente. 
-const int ID_SERIAL=99999;			// N° Serial del dispositivo.
+const int ID_SERIAL=88888;			// N° Serial del dispositivo.
 unsigned long currentTime = millis(); 	// Tiempo actual.
 unsigned long previousTime = 0;       	// Tiempo anterior.
 const long timeoutTime = 2000;        	// Se define un timeout en milisegundos (example: 2000ms = 2s).
@@ -81,6 +84,7 @@ boolean rel3=false;
 boolean rel4=false;
 boolean flag_actualizar;
 boolean flag_enviarDatos;
+float temp_max=200, temp_min=-200, hum_max=200, hum_min=-200;    //donde se almacena los valores de temp y hum criticos, por default estan valores inalcanzables
 
 // Prototipos de funciones:
 void configPines();
@@ -95,9 +99,9 @@ void recuperarEEPROM();
 void grabar(int, String );
 String leer(int);
 void buscardatos();
-void analizardatos(String);
 void desconectarWifi();
 void actualizarDatos();
+void limites (float, float);		       //funcion que compara los valores limites de temp y hum y avisa en caso necesario
 // ==================== FUNCIONES DE MQTT ================================
 void callback(char* , byte* , unsigned int );
 void reconnect();
@@ -420,7 +424,7 @@ void transmitirDatos()
 	tempe[index]=t;
 	hume[index]=h;
 	//imprimimos el index ----------->TESTEO<-----------------------
-	Serial.println(index);
+	// Serial.println(index);
 	// Si ya tome 20 valores, reinicio el indice y promedio y envio los datos sensados
 	if(index==19)	
 	{
@@ -437,7 +441,9 @@ void transmitirDatos()
 
 		tempsend=tempsend/20;
 		humsend=humsend/20;
+		
 		reconnect();
+		limites(tempsend,humsend);    //ve si se sobrepasan los limites <---------------------------------------------------------
 		// Se construye el mensaje a mandar y se lo transforma a charArray y se lo guarda en el buffer 'msg'
 		postData = String(tempsend) + "/" + String(humsend);
 		postData.toCharArray(msg, MSG_BUFFER_SIZE);
@@ -481,7 +487,6 @@ String leer(int addr)
 	return strlectura;
 }
 
-
 void buscardatos()    			//Esta función es para chequear los valores de los reles almacenados en la base de datos, solo se debe consultar cuando se reincia el dispositivo o se conecta a internet
 {
 	reconnect();	
@@ -490,95 +495,6 @@ void buscardatos()    			//Esta función es para chequear los valores de los rel
 	// Se publica el mensaje en el topico indicado
 	clientMQTT.publish(topico_pub_consultabotones, msg);
 	return;
-}
-
-// ESTA FUNCION NO ESTA SIENDO USADA
-void analizardatos(String aux)
-{    //toma los datos que mandamos a pedir al server y define el estado de los reles y almacena los enteros y el string.
-
-
-	//Definimos donde vamos a encontrar los limites de cada dato
-	int primer 	= aux.indexOf(":");
-	int segunda = aux.indexOf(":", primer+1);
-	int tercer 	= aux.indexOf(":", segunda+1);
-	int cuarta 	= aux.indexOf(":", tercer+1);
-	int quinta 	= aux.indexOf(":", cuarta+1);
-	int num1A   = aux.indexOf(":", quinta+1);
-	int num1B 	= aux.indexOf(",", num1A);
-	int num2A   = aux.indexOf(":", num1B+1);
-	int num2B 	= aux.indexOf(",", num2A);
-	int num3A   = aux.indexOf(":", num2B+1);
-	int num3B 	= aux.indexOf(",", num3A);
-	int num4A   = aux.indexOf(":", num3B+1);
-	int num4B 	= aux.indexOf(",", num4A);
-	int num5A   = aux.indexOf(":", num4B+1);
-	int num5B 	= aux.indexOf(",", num5A);
-	int str 	= aux.indexOf(":",num5B+1); 
-
-	//Llevamos a cabo la asignacion de los valores a cada lugar correspondiente
-	int r= aux.substring(primer+1,primer+2).toInt();
-	if(r==1)
-	{
-		digitalWrite(rele1,HIGH);
-		Serial.println("el estado del rele1=1");
-	}
-	else
-	{
-		digitalWrite(rele1,LOW);
-		Serial.println("el estado del rele1=0");
-	}
-	r=aux.substring(segunda+1,segunda+2).toInt();
-	if(r==1)
-	{
-		digitalWrite(rele2,HIGH);
-		Serial.println("el estado del rele2=1");
-	}
-	else
-	{
-		digitalWrite(rele2,LOW);
-		Serial.println("el estado del rele2=0");
-	}
-	r=aux.substring(tercer+1,tercer+2).toInt();
-	if(r==1)
-	{
-		digitalWrite(rele3,HIGH);
-		Serial.println("el estado del rele3=1");
-	}
-	else
-	{
-		digitalWrite(rele3,LOW);
-		Serial.println("el estado del 3=0");
-	}
-	r=aux.substring(cuarta+1,cuarta+2).toInt();
-	if(r==1)
-	{
-		digitalWrite(rele4,HIGH);
-		Serial.println("el estado del rele4=1\n");
-	}
-	else
-	{
-		digitalWrite(rele4,LOW);
-		Serial.println("el estado del rele4=0\n");
-	}
-	// NO HAY 5 RELES (A PESAR QUE SI HAY 5 BOTONES EN LA PAG WEB)
-	// r=aux.substring(quinta+1,quinta+2).toInt();
-	// if(r==1)
-	// {
-	// 	digitalWrite(rele5,HIGH);
-	// 	Serial.println("el estado del 5=1");
-	// }
-	// else
-	// {
-	// 	digitalWrite(rele5,LOW);
-	// 	Serial.println("el estado del 5=0");
-	// }
-	receivedNum1=aux.substring(num1A+1,num1B-1).toInt();
-	receivedNum2=aux.substring(num2A+1,num2B-1).toInt();
-	receivedNum3=aux.substring(num3A+1,num3B-1).toInt();
-	receivedNum4=aux.substring(num4A+1,num4B-1).toInt();
-	receivedNum5=aux.substring(num5A+1,num5B-1).toInt();
-	text_1=aux.substring(str);
-	
 }
 
 void configPines()
@@ -675,13 +591,8 @@ void desconectarWifi()
 
 void actualizarDatos()
 {
-	int datoA,datoB,datoC,datoD;
-	datoA=digitalRead(rele1);
-	datoB=digitalRead(rele2);
-	datoC=digitalRead(rele3);
-	datoD=digitalRead(rele4);
 	reconnect();
-	postData =String(datoA) + "/" + String(datoB) + "/" + String(datoC) +"/" + String(datoD);
+	postData =String(rel1) + "/" + String(rel2) + "/" + String(rel3) +"/" + String(rel4);
 	Serial.println(postData); //LINEA PARA DEBUGEO
 	postData.toCharArray(msg, MSG_BUFFER_SIZE);
 
@@ -707,11 +618,11 @@ void callback(char* topic, byte* payload, unsigned int length)
 	{
 		for (unsigned int i = 0; i < length; i++) 
 		{
-			boolean estado= (payload[i]==49);
-			Serial.println(payload[i]);
+			boolean estado= (payload[i]==49);	// Se comprueba el valor recibido (en ASCII '0'=48 '1'=49), si llega 0 es false lo cual pone en bajo el pin.
+		
 			switch (i) 
-			{
-				case 0:
+			{			
+				case 0:	//formato del mensaje recibido x/x/x/x motivo por el cual se revisan los casos pares.
 					digitalWrite(rele1,estado);
 					break;
 				case 2:
@@ -728,10 +639,13 @@ void callback(char* topic, byte* payload, unsigned int length)
 			}
 		}
 	}
-	// else if (strcmp(topic,) == 0)
-	// {
-	// 	// Aca se completa con algoritmo de parseo del mensaje de vuelta (quizas llamar a analizar datos)
-	// }
+	else
+	{
+		if (strcmp(topic,topico_sub_limites) == 0)
+		{
+
+		}
+	}
 }
 
 void reconnect() 
@@ -741,23 +655,48 @@ void reconnect()
 	while (!clientMQTT.connected()) 
 	{
 		Serial.print("Intentando conexión MQTT...");
+
 		// Se crea un cliente random para conectarse al broker
 		String clientId = "ESP8266Client-" + String(ID_SERIAL);
 		clientId += String(random(0xffff), HEX);
+		
 		// Intenta conectarse con las credenciales
 		if (clientMQTT.connect(clientId.c_str(),mqtt_user,mqtt_pass)) 
 		{
-		Serial.println("Conectado con exito!!");
-		// Para debugging 
-		clientMQTT.publish("KMb6809yr8FThW1/outTopic", "hello world");  
-		// Se vuelve a suscribir a todo lo que haga falta escuchar
-		clientMQTT.subscribe("KMb6809yr8FThW1/inTopic");
-		clientMQTT.subscribe(topico_sub_botones);
-		} else {
-		Serial.print("Fallo al conectar, rc=");
-		Serial.print(clientMQTT.state());
-		Serial.println(" intentando nuevamente en 5 segundos");
-		delay(5000);
+			Serial.println("Conectado con exito!!");
+			// Para debugging 
+			clientMQTT.publish("KMb6809yr8FThW1/outTopic", "hello world");  
+			// Se vuelve a suscribir a todo lo que haga falta escuchar
+			clientMQTT.subscribe("KMb6809yr8FThW1/inTopic");
+			clientMQTT.subscribe(topico_sub_botones);
+			clientMQTT.subscribe(topico_sub_limites);
+		} 
+		else 
+		{
+			Serial.print("Fallo al conectar, rc=");
+			Serial.print(clientMQTT.state());
+			Serial.println(" intentando nuevamente en 5 segundos");
+			delay(5000);
 		}
 	}
 }
+
+void limites (float temp_actual, float hum_actual)
+{
+	if(temp_actual>temp_max){
+		clientMQTT.publish(topico_pub_alarma, "temp_max");
+	}
+	
+	if(temp_actual<temp_min){
+		clientMQTT.publish(topico_pub_alarma, "temp_min");
+	}
+
+	if(hum_actual>hum_max){
+		clientMQTT.publish(topico_pub_alarma, "hum_max");
+	}
+	
+	if(hum_actual<hum_min){
+		clientMQTT.publish(topico_pub_alarma, "hum_min");
+	}
+}
+
