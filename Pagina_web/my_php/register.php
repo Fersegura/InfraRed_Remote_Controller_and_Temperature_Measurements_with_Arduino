@@ -4,7 +4,7 @@
 
     
     $usuario    = strip_tags($_POST['usuario'])             ;   // strip_tags actua como barrera si me quieren mandar codigo HTML a traves del formulario
-    $mail       = sha1(strip_tags($_POST['mail']))          ;
+    $mail       =       strip_tags($_POST['mail'])          ;
     $mail_paraenviar = strip_tags($_POST['mail'])           ;   // Almaceno temporalmente una copia del mail para poder enviarle un correo al nuevo usuario
     $password   = sha1(strip_tags($_POST['password']))      ;   // sha1 es un metodo de encriptado para mayor seguridad
     $password_paramedir = strip_tags($_POST['password'])    ;   // Para ver la longitud necesito que NO este encriptada
@@ -92,7 +92,8 @@
                 $para       = $mail_paraenviar;
                 $asunto     = "Activar cuenta para utilizar el servicio de Santi y Fer.";
                 $mensaje    = '<div align="center"><h1>¡BIENVENIDO!</h1><br></br><h2>Hola '.$usuario.' debes activar tu cuenta para poder logearte.</h2><br></br>
-                               <h3>Haz click en el siguiente enlace para activarla: <a href='.$url.'><b>Activar</b></a></h3></div>';
+                               <h3>Haz click en el siguiente enlace para activarla: <a href='.$url.'><b>Activar.</b></a></h3><br></br> 
+                               <h4>AVISO: Si el correo está en "SPAM" tiene que sacarlo de esa carpeta. Si no funciona copie y pegue el siguiente enlace:'.$url.'</h4></div>';
                 
                 if(send_mail($para, $usuario, $asunto, $mensaje))
                 {

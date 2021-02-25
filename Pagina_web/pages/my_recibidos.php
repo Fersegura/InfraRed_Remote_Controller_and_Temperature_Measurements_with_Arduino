@@ -266,7 +266,7 @@
                                     <!-- Aca entra el codigo .php que hace fetching a la BD -->
                                     <?php
                                         //Again, we grab the table out of the database, name is ESPtable2 in this case
-                                        $result = mysqli_query($con,"SELECT * FROM `ESPtable2`");//table select
+                                        $result = mysqli_query($con,"SELECT * FROM `ESPtable2` WHERE id_usuario='".$_SESSION['usuario_id']."'");//table select
 
                                         //loop through the table and print the data into the table
                                         while($row = mysqli_fetch_array($result)) {
@@ -368,7 +368,7 @@
                                     <!-- Aca entra el codigo .php que hace fetching a la BD -->
                                     <?php
                                         //Again, we grab the table out of the database, name is ESPtable2 in this case
-                                        $result = mysqli_query($con,"SELECT * FROM `ESPtable2`");//table select
+                                        $result = mysqli_query($con,"SELECT * FROM `ESPtable2` WHERE id_usuario='".$_SESSION['usuario_id']."'");//table select
 
                                         // Por el momento, como no hay mas de un dispositivo no hace falta el ciclo while
                                         $row = mysqli_fetch_array($result);

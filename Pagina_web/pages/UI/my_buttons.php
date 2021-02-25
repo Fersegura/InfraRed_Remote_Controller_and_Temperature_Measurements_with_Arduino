@@ -28,8 +28,6 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">		
         <title>Enviar datos</title>
-
-
         <!-- Google Font: Source Sans Pro -->
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
         <!-- Font Awesome -->
@@ -253,11 +251,11 @@
                                     <!-- Aca entra el codigo .php que hace fetching a la BD para que los botones hagan algo -->
                                     <?php
                                         //Again, we grab the table out of the database, name is ESPtable2 in this case
-                                        $result = mysqli_query($con,"SELECT * FROM `ESPtable2`");//table select
+                                        $result = mysqli_query($con,"SELECT * FROM `ESPtable2` WHERE id_usuario='".$_SESSION['usuario_id']."'");//table select
 
                                         //loop through the table and print the data into the table
                                         while($row = mysqli_fetch_array($result)) {
-                                            
+                                        
                                             $unit_id = $row['id'];
                                                                                         
                                             $column1 = "RECEIVED_BOOL1";
@@ -331,6 +329,8 @@
                                             $color_current_bool_5 = "#e04141";
                                             }
                                         }
+                                        
+                                        
 
                                     ?>
                                     <!-- Tabla botones -->
@@ -431,7 +431,7 @@
                                     <!-- Aca entra el codigo .php que hace fetching a la BD para que los botones hagan algo -->
                                     <?php
                                         //Again, we grab the table out of the database, name is ESPtable2 in this case
-                                        $result = mysqli_query($con,"SELECT * FROM `ESPtable2`");//table select
+                                        $result = mysqli_query($con,"SELECT * FROM `ESPtable2` WHERE id_usuario='".$_SESSION['usuario_id']."'");//table select
 
                                         //loop through the table and print the data into the table
                                         while($row = mysqli_fetch_array($result)) {
@@ -546,7 +546,7 @@
                                     <!-- Aca entra el codigo .php que hace fetching a la BD para que los botones hagan algo -->
                                     <?php
                                         //Again, we grab the table out of the database, name is ESPtable2 in this case
-                                        $result = mysqli_query($con,"SELECT * FROM `ESPtable2`");//table select
+                                        $result = mysqli_query($con,"SELECT * FROM `ESPtable2` WHERE id_usuario='".$_SESSION['usuario_id']."'");//table select
 
                                         //loop through the table and print the data into the table
                                         while($row = mysqli_fetch_array($result)) {

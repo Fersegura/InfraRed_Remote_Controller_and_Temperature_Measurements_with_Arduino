@@ -2,7 +2,7 @@
     session_start();
     // Si ya esta la sesion abierta me vuelvo a la pagina desde la cual quise entrar
     // Cuando la sesion no estaba iniciada esto tira un error, para que no aparezca desactivar el eror_reporting (solo cuando ya esta todo verificado que funciona xq si no me anula todos los otros errores)
-    // error_reporting(0);
+    error_reporting(0);
     if($_SESSION['logged'] == "yes")
     {
         echo "<script type='text/javascript'>alert('Ya ingreso con una cuenta!');</script>";
