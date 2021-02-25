@@ -3,6 +3,7 @@ import paho.mqtt.client as mqtt
 import sys
 import pymysql.cursors
 import time # Para tener el tiempo en UNIX para guardar en la BD
+import smtplib, ssl # Para enviar el correo de alarma
 
 """
     Funcion para conectarnos a la base de datos de forma remota.
@@ -76,6 +77,7 @@ def conectarse_mqtt():
     client.message_callback_add(sub="KMb6809yr8FThW1/+/+/botones", callback=actualizarbotones)
     client.message_callback_add(sub="KMb6809yr8FThW1/+/BD/consultabotones", callback=consultabotones)
     client.message_callback_add(sub="KMb6809yr8FThW1/+/python/consultabotones", callback=consultabotones)
+    client.message_callback_add(sub="KMb6809yr8FThW1/+/python/trigger_alarma", callback=trigger_alarma)
 
     try:
         client.connect(host="ioticos.org", port=1883, keepalive=60) #COMPLETAR CON LOS DATOS DE NUESTRO BROKER
@@ -90,7 +92,6 @@ def conectarse_mqtt():
     Debe guardar en la BD la informacion de forma correcta.
 """
 def temyhum(client, userdata, msg):
-    print("se entro a temyhum") #LINEA COMPLETAMENTE PARA DEBUG
     topico = msg.topic.split("/")   # Devuelve una lista el split
     origen = topico[1]              # En nuestra estructura de topicos, despues del root viene quien hizo la publicacion (el origen del publish)
     # Hay que transformar el payload que es de tipo 'byte' a str
@@ -117,7 +118,6 @@ def temyhum(client, userdata, msg):
     Debe cambiar el estado de los botones en la BD.
 """
 def actualizarbotones(client, userdata, msg):
-    print("se entro a actualizarbotones") #LINEA COMPLETAMENTE PARA DEBUG
     topico = msg.topic.split("/")   
     origen = topico[1]
 
@@ -151,10 +151,9 @@ def actualizarbotones(client, userdata, msg):
     Debe publicar el estado de los botones del dispositivo que consulta.
 """
 def consultabotones(client, userdata, msg):
-    print("se entro a consultaboltones") #LINEA COMPLETAMENTE PARA DEBUG
     topico = msg.topic.split("/")   
     if (topico[1]=="BD" or topico[1]=="web"):
-        destino = msg.payload.decode("utf-8")
+        destino = msg.payload.decode("utf-8")   # Si el mensaje viene de la web, el serial_id de la placa viene en el payload
     else:
         destino =topico[1]  # Desde le PHP se deberia publicar a un topico roon/web/consultabotones/99999  ----->capaz no publicar desde el php solo hacer la consulta y publicar desdel el python
 
@@ -165,7 +164,6 @@ def consultabotones(client, userdata, msg):
         cursor.execute(sql,  )
         result = cursor.fetchall()  # Es del tipo lista, y adentro tiene un diccionario, con key=NombreColumna, value=ValorDeLaColumnaEnLaBD
     connection.commit()
-    print(result)
     # Parseo el resultado de la busqueda para armar el payload del publish que voy a hacer
     boton1, boton2, boton3, boton4 = result[0]['RECEIVED_BOOL1'], result[0]['RECEIVED_BOOL2'], result[0]['RECEIVED_BOOL3'], result[0]['RECEIVED_BOOL4']
 
@@ -175,6 +173,48 @@ def consultabotones(client, userdata, msg):
     client.publish(topic=topic, payload=payload, qos=0, retain=False)
 
     return
+
+"""
+    Funcion de callback para el topico de trigger_alarma.
+    Debe enviar un mail al usuario dueño de la placa para avisarle que se excedió algún límite.
+"""
+def trigger_alarma(client, userdata, msg):
+    topico = msg.topic.split("/")   
+    origen = topico[1]              
+
+    sql = "SELECT `id_usuario` FROM `ESPtable2` WHERE `id`='" + origen + "'"    # Busco al dueño de la placa     
+
+    with connection.cursor() as cursor:
+        cursor.execute(sql,  )
+        result = cursor.fetchall() 
+        id_usuario = result[0]['id_usuario']
+        sql = "SELECT `usuario`, `mail` FROM `usuarios` WHERE `id`='" + str(id_usuario) + "'"    # Busco el mail del dueño 
+        cursor.execute(sql,  )
+        result = cursor.fetchall()
+        mail_usuario = result[0]['mail']
+        nombre_usuario = result[0]['usuario']
+    connection.commit()
+
+    # Credenciales para conexión STMP segura con SSL:
+    smtp_server = 'smtp.gmail.com'
+    port = 465
+    sender = 'santiyfer21@gmail.com'
+    password = 'v2FX4k0xD1sj26d9'
+    message = """\
+    Asunto: Se disparo una alarma!
+
+    Hola """+ nombre_usuario +""", este es un correo automatico para avisarte que se disparo una de las alarmas que habias establecido.
+    """
+    context = ssl.create_default_context()
+    
+    with smtplib.SMTP_SSL(host=smtp_server, port=port, context=context) as server:
+        server.login(sender, password)
+        # Enviamos el correo:
+        server.sendmail(from_addr=sender, to_addrs=mail_usuario, msg=message)
+        server.quit()
+    
+    return
+
 
 """
     Funcion de callback para topicos publicados por este sript Python.
