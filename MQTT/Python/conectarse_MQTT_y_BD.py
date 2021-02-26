@@ -201,7 +201,7 @@ def trigger_alarma(client, userdata, msg):
     sender = 'santiyfer21@gmail.com'
     password = 'v2FX4k0xD1sj26d9'
     message = """\
-    Asunto: Se disparo una alarma!
+    R.S.A
 
     Hola """+ nombre_usuario +""", este es un correo automatico para avisarte que se disparo una de las alarmas que habias establecido.
     """
