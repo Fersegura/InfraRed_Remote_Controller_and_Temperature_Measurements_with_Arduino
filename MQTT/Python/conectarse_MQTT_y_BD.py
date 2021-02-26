@@ -4,6 +4,9 @@ import sys
 import pymysql.cursors
 import time # Para tener el tiempo en UNIX para guardar en la BD
 import smtplib, ssl # Para enviar el correo de alarma
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.utils import formataddr
 
 """
     Funcion para conectarnos a la base de datos de forma remota.
@@ -200,17 +203,52 @@ def trigger_alarma(client, userdata, msg):
     port = 465
     sender = 'santiyfer21@gmail.com'
     password = 'v2FX4k0xD1sj26d9'
-    message = """\
+    context = ssl.create_default_context()
+
+    # PRUEBAS PARA MANDAR MAIL PITUCOS==============================
+    message = MIMEMultipart("alternative")
+    message["Subject"] = "ALARMA"
+    message["From"] = formataddr(('R.S.A', sender))
+    message["To"] = mail_usuario
+
+    # Create the plain-text and HTML version of your message
+    text = """\
     R.S.A
 
-    Hola """+ nombre_usuario +""", este es un correo automatico para avisarte que se disparo una de las alarmas que habias establecido.
+    Hola """+ nombre_usuario +""", este es un correo automatico para avisarte que se disparo una de las alarmas que habias establecido."""
+    
+    html = """\
+    <html>
+    <body>
+        <h3><p>Hola, """+ nombre_usuario +"""<br>
+        este es un correo automatico para avisarte que se disparo una de las alarmas que habias establecido.</h3><br>
+        </p>
+    </body>
+    </html>
     """
-    context = ssl.create_default_context()
+
+    # Turn these into plain/html MIMEText objects
+    part1 = MIMEText(text, "plain")
+    part2 = MIMEText(html, "html")
+
+    # Add HTML/plain-text parts to MIMEMultipart message
+    # The email client will try to render the last part first
+    message.attach(part1)
+    message.attach(part2)
+    # ==============================================================
+
+    # message = """\
+    # R.S.A
+
+    # Hola """+ nombre_usuario +""", este es un correo automatico para avisarte que se disparo una de las alarmas que habias establecido.
+    # """
+
     
     with smtplib.SMTP_SSL(host=smtp_server, port=port, context=context) as server:
         server.login(sender, password)
         # Enviamos el correo:
-        server.sendmail(from_addr=sender, to_addrs=mail_usuario, msg=message)
+        # server.sendmail(from_addr=sender, to_addrs=mail_usuario, msg=message)
+        server.sendmail(from_addr=sender, to_addrs=mail_usuario, msg=message.as_string())
         server.quit()
     
     return
