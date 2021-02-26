@@ -643,7 +643,7 @@ void callback(char* topic, byte* payload, unsigned int length)
 	{
 		if (strcmp(topic,topico_sub_limites) == 0)
 		{
-
+// 			Fijarse el metodo char() para convertir de byte a char
 		}
 	}
 }
