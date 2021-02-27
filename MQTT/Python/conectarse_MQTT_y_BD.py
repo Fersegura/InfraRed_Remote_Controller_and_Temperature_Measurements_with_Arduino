@@ -205,7 +205,7 @@ def trigger_alarma(client, userdata, msg):
     password = 'v2FX4k0xD1sj26d9'
     context = ssl.create_default_context()
 
-    # PRUEBAS PARA MANDAR MAIL PITUCOS==============================
+    # Se construye el mensaje en formato HTML y texto, por si falla el formateo a HTML se envie el de texto
     message = MIMEMultipart("alternative")
     message["Subject"] = "ALARMA"
     message["From"] = formataddr(('R.S.A', sender))
@@ -215,39 +215,35 @@ def trigger_alarma(client, userdata, msg):
     text = """\
     R.S.A
 
+    HA SALTADO UNA ALARMA DE TU DISPOSITIVO!
+
     Hola """+ nombre_usuario +""", este es un correo automatico para avisarte que se disparo una de las alarmas que habias establecido."""
     
     html = """\
     <html>
-    <body>
-        <h3><p>Hola, """+ nombre_usuario +"""<br>
-        este es un correo automatico para avisarte que se disparo una de las alarmas que habias establecido.</h3><br>
-        </p>
-    </body>
+        <body>
+            <div align="center">
+                <h1>HA SALTADO UNA ALARMA DE TU DISPOSITIVO!</h1><br>
+            </div>
+            <div align="right">
+                <h2>Hola """+ nombre_usuario +""", este es un correo automatico para avisarte que se disparo una de las alarmas que habias establecido.</h2><br>
+            </div>
+        </body>
     </html>
     """
 
-    # Turn these into plain/html MIMEText objects
+    # Convierto estas partes en objetos plain/html MIMEText 
     part1 = MIMEText(text, "plain")
     part2 = MIMEText(html, "html")
 
-    # Add HTML/plain-text parts to MIMEMultipart message
-    # The email client will try to render the last part first
+    # Agregamos las partes HTML/plain-text al mensaje MIMEMultipart
+    # El cliente email va a tratar de renderizar la parte HTML primero y si falla hace lo otro
     message.attach(part1)
     message.attach(part2)
-    # ==============================================================
-
-    # message = """\
-    # R.S.A
-
-    # Hola """+ nombre_usuario +""", este es un correo automatico para avisarte que se disparo una de las alarmas que habias establecido.
-    # """
-
     
     with smtplib.SMTP_SSL(host=smtp_server, port=port, context=context) as server:
         server.login(sender, password)
         # Enviamos el correo:
-        # server.sendmail(from_addr=sender, to_addrs=mail_usuario, msg=message)
         server.sendmail(from_addr=sender, to_addrs=mail_usuario, msg=message.as_string())
         server.quit()
     
