@@ -19,7 +19,6 @@ def conectarse_bd():                                        #ver de agregar mas 
                                 password='mUngxZTVJj',
                                 database='C4gd1lgeA2',
                                 charset='utf8mb4',
-                                # port="3306", 
                                 cursorclass=pymysql.cursors.DictCursor)
         print("Si se pudo conectar a la base de datos...")
         return connection
@@ -39,6 +38,12 @@ def on_connect(client, userdata, flags, rc):
     print("Conectado - Codigo de resultado: "+str(rc))
     # Esto se hace por si se pierde conexion en algun momento, se renueven las suscripciones que habia
     client.subscribe("KMb6809yr8FThW1/#")
+    client.message_callback_add(sub="KMb6809yr8FThW1/python/#", callback=ignorar)
+    client.message_callback_add(sub="KMb6809yr8FThW1/+/BD/temyhum", callback=temyhum)
+    client.message_callback_add(sub="KMb6809yr8FThW1/+/+/botones", callback=actualizarbotones)
+    client.message_callback_add(sub="KMb6809yr8FThW1/+/BD/consultabotones", callback=consultabotones)
+    client.message_callback_add(sub="KMb6809yr8FThW1/+/python/consultabotones", callback=consultabotones)
+    client.message_callback_add(sub="KMb6809yr8FThW1/+/python/trigger_alarma", callback=trigger_alarma)
 
 """
     Funcion de callback por defecto cuando llega un mensaje de PUBLISH al broker.
@@ -52,17 +57,6 @@ def on_message(client, userdata, msg):
     topico = msg.topic.split("/")   # Devuelve una lista el split
     origen = topico[1]              # En nuestra estructura de topicos, despues del root viene quien hizo la publicacion (el origen del publish)
 
-    # if topico[2] == "losacoporelmomento":
-
-    #     with connection.cursor() as cursor:
-    #         sql = "SELECT * FROM `usuarios`"
-    #         cursor.execute(sql,  )
-    #         result = cursor.fetchall()
-    #         print(result)
-    #     return
-    
-    # # Este es el default del "switch" hecho con los elif
-    # else:
     print("TOPICO DESCONOCIDO")
     return
 
@@ -81,6 +75,7 @@ def conectarse_mqtt():
     client.message_callback_add(sub="KMb6809yr8FThW1/+/BD/consultabotones", callback=consultabotones)
     client.message_callback_add(sub="KMb6809yr8FThW1/+/python/consultabotones", callback=consultabotones)
     client.message_callback_add(sub="KMb6809yr8FThW1/+/python/trigger_alarma", callback=trigger_alarma)
+    client.message_callback_add(sub="KMb6809yr8FThW1/web/python/set_limites", callback=set_limites)
 
     try:
         client.connect(host="ioticos.org", port=1883, keepalive=60) #COMPLETAR CON LOS DATOS DE NUESTRO BROKER
@@ -125,10 +120,8 @@ def actualizarbotones(client, userdata, msg):
     origen = topico[1]
 
     mensaje = msg.payload.decode("utf-8")
-    print(mensaje)
     mensaje = mensaje.split("/")
     boton1, boton2, boton3, boton4 = mensaje[0], mensaje[1], mensaje[2], mensaje[3]
-
 
     # Implementacion de prueba !!!!
     if origen == "web":
@@ -179,7 +172,7 @@ def consultabotones(client, userdata, msg):
 
 """
     Funcion de callback para el topico de trigger_alarma.
-    Debe enviar un mail al usuario dueño de la placa para avisarle que se excedió algún límite.
+    Debe enviar un mail al usuario dueño de la placa para avisarle que se excedió algún límite indicandole la placa que emitio la alarma.
 """
 def trigger_alarma(client, userdata, msg):
     topico = msg.topic.split("/")   
@@ -250,6 +243,28 @@ def trigger_alarma(client, userdata, msg):
     
     return
 
+"""
+    Funcion de callback para el topico de set_limites. 
+    El PHP es el publicador a este tópico.
+    Se buscan los limites y se los publica en el topico al cual está suscripto el ESP8266
+"""
+def set_limites(client, userdata, msg):
+    destino = msg.payload.decode("utf-8")   # El serial_id de la placa viene en el payload
+
+    sql = "SELECT  `RECEIVED_NUM1`, `RECEIVED_NUM2`, `RECEIVED_NUM3`, `RECEIVED_NUM4`, `RECEIVED_NUM5` FROM `ESPtable2` WHERE `id`='" + destino + "'"        
+
+    with connection.cursor() as cursor:
+        cursor.execute(sql,  )
+        result = cursor.fetchall() 
+    connection.commit()
+
+    # Se obtiene el resultado y se publican en el topico correspondiente
+    num1, num2, num3, num4 = result[0]['RECEIVED_NUM1'], result[0]['RECEIVED_NUM2'], result[0]['RECEIVED_NUM3'], result[0]['RECEIVED_NUM4']
+
+    payload = str(num1)+"/"+str(num2)+"/"+str(num3)+"/"+str(num4)
+    topic="KMb6809yr8FThW1/python/"+destino+"/get_limites"
+
+    client.publish(topic=topic, payload=payload, qos=0, retain=False)
 
 """
     Funcion de callback para topicos publicados por este sript Python.
