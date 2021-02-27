@@ -215,7 +215,10 @@ def trigger_alarma(client, userdata, msg):
 
     HA SALTADO UNA ALARMA DE TU DISPOSITIVO!
 
-    Hola """+ nombre_usuario +""", este es un correo automatico para avisarte que se disparo una de las alarmas que habias establecido."""
+    Hola """+ nombre_usuario +""", este es un correo automatico para avisarte que se disparo una de las alarmas que habias establecido.
+    La alarma que se disparó es: """+ alarma +""". El valor sensado es: """+ valor +"""
+    El dispositivo de origen de la alarma es el de serial: """+ origen +"""
+    """
     
     html = """\
     <html>
