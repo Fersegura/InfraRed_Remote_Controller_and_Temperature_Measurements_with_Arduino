@@ -43,12 +43,12 @@ struct Condiciones
 const char* mqtt_server = "ioticos.org";
 const char *mqtt_user = "pdmlO2qrY6s8h7y";
 const char *mqtt_pass = "m1bGUlqz27SMsmX";
-const char *topico_pub_temyhum = "KMb6809yr8FThW1/88888/BD/temyhum";      				 //mandamos la ultima temperatura y humedad promediada
-const char *topico_pub_botones = "KMb6809yr8FThW1/88888/BD/botones";	 				 //mandamos el ultimo estado de los reles modificados con los botones
-const char *topico_pub_consultabotones = "KMb6809yr8FThW1/88888/BD/consultabotones";  	 //preguntamos como estaban los botones en la BD
-const char *topico_pub_alarma = "KMb6809yr8FThW1/88888/python/trigger_alarma";
-const char *topico_sub_botones = "KMb6809yr8FThW1/python/88888/consultabotones";	 	 //nos subcribimos a todas las fuentes que muestren el estado de los reles
-const char *topico_sub_limites = "KMb6809yr8FThW1/python/88888/get_limites";
+const char *topico_pub_temyhum = "KMb6809yr8FThW1/88888/BD/temyhum";      				// Mandamos la ultima temperatura y humedad promediada
+const char *topico_pub_botones = "KMb6809yr8FThW1/88888/BD/botones";	 				// Mandamos el ultimo estado de los reles modificados con los botones
+const char *topico_pub_consultabotones = "KMb6809yr8FThW1/88888/BD/consultabotones";  	// Preguntamos como estaban los botones en la BD
+const char *topico_pub_alarma = "KMb6809yr8FThW1/88888/python/trigger_alarma";			// Para avisar que se supero un valor limite
+const char *topico_sub_botones = "KMb6809yr8FThW1/python/88888/consultabotones";	 	// Nos subcribimos a todas las fuentes que muestren el estado de los reles
+const char *topico_sub_limites = "KMb6809yr8FThW1/python/88888/get_limites";			// Para actualizar los valores limites
 
 
 WiFiClient clientWiFi;
@@ -442,8 +442,9 @@ void transmitirDatos()
 		tempsend=tempsend/20;
 		humsend=humsend/20;
 		
+		limites(tempsend,humsend);    //ve si se sobrepasan los limites 
+		
 		reconnect();
-		limites(tempsend,humsend);    //ve si se sobrepasan los limites <---------------------------------------------------------
 		// Se construye el mensaje a mandar y se lo transforma a charArray y se lo guarda en el buffer 'msg'
 		postData = String(tempsend) + "/" + String(humsend);
 		postData.toCharArray(msg, MSG_BUFFER_SIZE);
@@ -600,6 +601,25 @@ void actualizarDatos()
 	clientMQTT.publish(topico_pub_botones, msg);
 }
 
+void limites (float temp_actual, float hum_actual)
+{
+	if(temp_actual>temp_max){
+		clientMQTT.publish(topico_pub_alarma, "temp_max");
+	}
+	
+	if(temp_actual<temp_min){
+		clientMQTT.publish(topico_pub_alarma, "temp_min");
+	}
+
+	if(hum_actual>hum_max){
+		clientMQTT.publish(topico_pub_alarma, "hum_max");
+	}
+	
+	if(hum_actual<hum_min){
+		clientMQTT.publish(topico_pub_alarma, "hum_min");
+	}
+}
+
 // =========== FUNCIONES PARA QUE FUNCIONE MQTT ======================================================================
 
 void callback(char* topic, byte* payload, unsigned int length) 
@@ -643,7 +663,44 @@ void callback(char* topic, byte* payload, unsigned int length)
 	{
 		if (strcmp(topic,topico_sub_limites) == 0)
 		{
-			// Fijarse en la funcion char() para convertir ascii en caracteres.
+			String aux1 = "";	// Auxiliar para ir guardando el valor que se va decodificando
+			int aux2 = 1;		// Auxiliar para saber que valor estoy leyendo
+
+			for (unsigned int i = 0; i < length; i++) 
+			{
+				// El payload que llega es de la pinta de x/x/x/x/ Necesito la ultima barra si o si para que se asignen todas las variables correctamente
+				if ((char)payload[i] != '/')
+				{
+					aux1 += (char)payload[i];	// Mientras leo el mismo valor decodifico y almaceno los bytes en un aux1
+					
+				}
+				else
+				{
+					switch (aux2)
+					{
+						case 1:	// Asigno el valor leido a la variable que corresponda casteando el String a float
+							aux2++;
+							temp_max = aux1.toFloat();	
+							break;
+						case 2:
+							aux2++;
+							temp_min = aux1.toFloat();
+							break;
+						case 3:
+							aux2++;
+							hum_max = aux1.toFloat();
+							break;
+						case 4:
+							aux2++;
+							hum_min = aux1.toFloat();
+							break;
+						default:
+							break;
+					}
+
+					aux1 = "";	// Limpio el valor que ya se guardo para arrancar a guardar un nuevo valor 
+				}
+			}
 		}
 	}
 }
@@ -678,25 +735,6 @@ void reconnect()
 			Serial.println(" intentando nuevamente en 5 segundos");
 			delay(5000);
 		}
-	}
-}
-
-void limites (float temp_actual, float hum_actual)
-{
-	if(temp_actual>temp_max){
-		clientMQTT.publish(topico_pub_alarma, "temp_max");
-	}
-	
-	if(temp_actual<temp_min){
-		clientMQTT.publish(topico_pub_alarma, "temp_min");
-	}
-
-	if(hum_actual>hum_max){
-		clientMQTT.publish(topico_pub_alarma, "hum_max");
-	}
-	
-	if(hum_actual<hum_min){
-		clientMQTT.publish(topico_pub_alarma, "hum_min");
 	}
 }
 
