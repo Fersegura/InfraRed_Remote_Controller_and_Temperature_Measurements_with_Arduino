@@ -177,7 +177,11 @@ def consultabotones(client, userdata, msg):
 """
 def trigger_alarma(client, userdata, msg):
     topico = msg.topic.split("/")   
-    origen = topico[1]              
+    origen = topico[1]
+    # En el payload viene que alarma es (temp o hum) y el valor que se detectó
+    payload = msg.payload.decode("utf-8")
+    alarma = payload.split("/")[0] 
+    valor  = payload.split("/")[1]
 
     sql = "SELECT `id_usuario` FROM `ESPtable2` WHERE `id`='" + origen + "'"    # Busco al dueño de la placa     
 
@@ -201,7 +205,7 @@ def trigger_alarma(client, userdata, msg):
 
     # Se construye el mensaje en formato HTML y texto, por si falla el formateo a HTML se envie el de texto
     message = MIMEMultipart("alternative")
-    message["Subject"] = "ALARMA"
+    message["Subject"] = "ALARMA!"
     message["From"] = formataddr(('R.S.A', sender))
     message["To"] = mail_usuario
 
@@ -221,7 +225,8 @@ def trigger_alarma(client, userdata, msg):
             </div>
             <div align="left">
                 <h2>Hola """+ nombre_usuario +""", este es un correo automatico para avisarte que se disparo una de las alarmas que habias establecido.</h2><br>
-                <p><h4>El dispositivo de origen de la alarma es el de serial: """+ origen +"""</h4></p>
+                <p><h3>La alarma que se disparó es: """+ alarma +""". El valor sensado es: """+ valor +"""<br>
+                El dispositivo de origen de la alarma es el de serial: """+ origen +"""</h3></p>
             </div>
         </body>
     </html>
