@@ -101,7 +101,7 @@ String leer(int);
 void buscardatos();
 void desconectarWifi();
 void actualizarDatos();
-void limites (float, float);		       //funcion que compara los valores limites de temp y hum y avisa en caso necesario
+void check_limites (float, float);		       //funcion que checkea los valores limites de temp y hum y avisa al usuario en caso necesario
 // ==================== FUNCIONES DE MQTT ================================
 void callback(char* , byte* , unsigned int );
 void reconnect();
@@ -442,7 +442,7 @@ void transmitirDatos()
 		tempsend=tempsend/20;
 		humsend=humsend/20;
 		
-		limites(tempsend,humsend);    //ve si se sobrepasan los limites 
+		check_limites(tempsend,humsend);    //ve si se sobrepasan los limites 
 		
 		reconnect();
 		// Se construye el mensaje a mandar y se lo transforma a charArray y se lo guarda en el buffer 'msg'
@@ -601,22 +601,30 @@ void actualizarDatos()
 	clientMQTT.publish(topico_pub_botones, msg);
 }
 
-void limites (float temp_actual, float hum_actual)
+void check_limites (float temp_actual, float hum_actual)
 {
 	if(temp_actual>temp_max){
-		clientMQTT.publish(topico_pub_alarma, "temp_max");
+		postData = "temperatura maxima/" + String(temp_actual);
+		postData.toCharArray(msg, MSG_BUFFER_SIZE);
+		clientMQTT.publish(topico_pub_alarma, msg);
 	}
 	
 	if(temp_actual<temp_min){
-		clientMQTT.publish(topico_pub_alarma, "temp_min");
+		postData = "temperatura minima/" + String(temp_actual);
+		postData.toCharArray(msg, MSG_BUFFER_SIZE);
+		clientMQTT.publish(topico_pub_alarma, msg);
 	}
 
 	if(hum_actual>hum_max){
-		clientMQTT.publish(topico_pub_alarma, "hum_max");
+		postData = "humedad maxima/" + String(hum_actual);
+		postData.toCharArray(msg, MSG_BUFFER_SIZE);
+		clientMQTT.publish(topico_pub_alarma, msg);
 	}
 	
 	if(hum_actual<hum_min){
-		clientMQTT.publish(topico_pub_alarma, "hum_min");
+		postData = "humedad minima/" + String(hum_actual);
+		postData.toCharArray(msg, MSG_BUFFER_SIZE);
+		clientMQTT.publish(topico_pub_alarma, msg);
 	}
 }
 
