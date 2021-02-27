@@ -262,7 +262,7 @@ def set_limites(client, userdata, msg):
     # Se obtiene el resultado y se publican en el topico correspondiente
     num1, num2, num3, num4 = result[0]['RECEIVED_NUM1'], result[0]['RECEIVED_NUM2'], result[0]['RECEIVED_NUM3'], result[0]['RECEIVED_NUM4']
 
-    payload = str(num1)+"/"+str(num2)+"/"+str(num3)+"/"+str(num4)
+    payload = str(num1)+"/"+str(num2)+"/"+str(num3)+"/"+str(num4)+"/"
     topic="KMb6809yr8FThW1/python/"+destino+"/get_limites"
 
     client.publish(topic=topic, payload=payload, qos=0, retain=False)
