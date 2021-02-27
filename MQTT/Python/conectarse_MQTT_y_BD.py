@@ -44,6 +44,7 @@ def on_connect(client, userdata, flags, rc):
     client.message_callback_add(sub="KMb6809yr8FThW1/+/BD/consultabotones", callback=consultabotones)
     client.message_callback_add(sub="KMb6809yr8FThW1/+/python/consultabotones", callback=consultabotones)
     client.message_callback_add(sub="KMb6809yr8FThW1/+/python/trigger_alarma", callback=trigger_alarma)
+    client.message_callback_add(sub="KMb6809yr8FThW1/web/python/set_limites", callback=set_limites)
 
 """
     Funcion de callback por defecto cuando llega un mensaje de PUBLISH al broker.
@@ -251,7 +252,7 @@ def trigger_alarma(client, userdata, msg):
 def set_limites(client, userdata, msg):
     destino = msg.payload.decode("utf-8")   # El serial_id de la placa viene en el payload
 
-    sql = "SELECT  `RECEIVED_NUM1`, `RECEIVED_NUM2`, `RECEIVED_NUM3`, `RECEIVED_NUM4`, `RECEIVED_NUM5` FROM `ESPtable2` WHERE `id`='" + destino + "'"        
+    sql = "SELECT  `RECEIVED_NUM1`, `RECEIVED_NUM2`, `RECEIVED_NUM3`, `RECEIVED_NUM4` FROM `ESPtable2` WHERE `id`='" + destino + "'"        
 
     with connection.cursor() as cursor:
         cursor.execute(sql,  )
