@@ -225,8 +225,9 @@ def trigger_alarma(client, userdata, msg):
             <div align="center">
                 <h1>HA SALTADO UNA ALARMA DE TU DISPOSITIVO!</h1><br>
             </div>
-            <div align="right">
+            <div align="left">
                 <h2>Hola """+ nombre_usuario +""", este es un correo automatico para avisarte que se disparo una de las alarmas que habias establecido.</h2><br>
+                <p><h4>El dispositivo de origen de la alarma es el de serial: """+ origen +"""</h4></p>
             </div>
         </body>
     </html>
