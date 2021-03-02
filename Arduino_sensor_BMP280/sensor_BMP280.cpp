@@ -1,4 +1,20 @@
-// Link video: https://www.youtube.com/watch?v=LtZ_b2WVMrU&t=734s
+/*
+	Link video: https://www.youtube.com/watch?v=LtZ_b2WVMrU&t=734s
+	Este codigo funciona perfectamente con ArduinoUNO y ESP8266 con las siguientes conexiones:
+	(En modo I2C)
+	ArduinoUNO	|	  BMP280
+		3v3		|		VCC
+		GND		|		GND
+		A4		|		SDA
+		A5		|		SCL
+
+	ESP8266		|	  BMP280
+		3v3		|		VCC
+		GND		|		GND
+	D2(GPIO4)	|		SDA
+	D1(GPIO5)	|		SCL
+
+*/
 
 #include <Wire.h>				// incluye libreria de bus I2C
 #include <Adafruit_Sensor.h>	// incluye librerias para sensor BMP280
@@ -12,14 +28,14 @@ float PRESION, P0;		// variables para almacenar valor de presion atmosferica
 
 void setup() 
 {
-	Serial.begin(9600);			// inicializa comunicacion serie a 9600 bps
+	Serial.begin(115200);			// inicializa comunicacion serie a 9600 bps
 	Serial.println("Iniciando:");	// texto de inicio
 	if ( !bmp.begin() ) 
 	{	// si falla la comunicacion con el sensor mostrar texto y detener flujo del programa
 	Serial.println("BMP280 no encontrado !");	
 	while (1);
 	}
-	P0 = bmp.readPressure()/100;			// almacena en P0 el valor actual de presion
+	P0 = bmp.readPressure()/100;		// almacena en P0 el valor actual de presion
 }										// en hectopascales para calculo de altitud relativa
 
 void loop() 
