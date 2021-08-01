@@ -12,11 +12,11 @@ struct Condiciones
 };
 
 /* === Variables wifi === */
-const char *ssid = "peinito";       // SSID de la red wifi que generara el dispositivo (cuando este en modo AP).
+const char *ssid = "ESP32-WiFi";    // SSID de la red wifi que generara el dispositivo (cuando este en modo AP).
 const char *pass = "0123456789";    // Contraseña de dicha red.
 String redes[15]; 	                // Arreglo que guarda hasta 15 redes.
 WiFiServer server(80);              // Servidor 
-Condiciones conexion;				// Es la estructura que guarda todos los parámetros de conexción
+Condiciones conexion;				// Es la estructura que guarda todos los parámetros de conexión
 
 /* ===  Funciones wifi === */
 void seleccionarRedWifi(int);
@@ -36,6 +36,7 @@ void setup()
     /* === Seteo puerto serie === */
     
     Serial.begin(9600);
+	pinMode(LED_BUILTIN, OUTPUT);
 
     /* === Configuración del WiFi === */
 
@@ -71,13 +72,17 @@ void loop()
     if(conexion.Conectarse)
 	{
         /*---------------COMPLETAR---------------*/
+		delay(500);
+		digitalWrite(LED_BUILTIN, HIGH);
+		delay(500);
+		digitalWrite(LED_BUILTIN, LOW);
 	}
     else{
 
     }
 }
 
-/* === Funciones WiFi === */
+/* ============ Funciones WiFi ============ */
 
 /**
  * Se almacenan los SSID de las redes encontradas.
@@ -97,7 +102,7 @@ void guardarRedes(int cantidad_redes)
  * Si no, muestra un boton para desconectarse de la red.
  * @param cantidad_redes
 */
-void seleccionarRedWifi(int cantidad_redes)
+void  seleccionarRedWifi(int cantidad_redes)
 {
     String datos;   // Datos de red
     String header;	// Header del request http
@@ -154,8 +159,8 @@ void seleccionarRedWifi(int cantidad_redes)
 						client.println(".button2 {background-color: #77878A;}</style></head>");
 						
 						// Cuerpo de la pagina web
-						if(!conexion.Conectarse){               //Si NO estamos conectados mostramos las redes disponibles y el lugar para poner el PASS
-							client.println("<body><h1><b>Alarmas rispiro</b></h1>");
+						if(!conexion.Conectarse){ //Si NO estamos conectados mostramos las redes disponibles y el lugar para poner el PASS
+							client.println("<body><h1><b>Seleccione una red</b></h1>");
 							client.print("<form><select name=\"ssidelegida\">");
 							// Se listan todas las redes que se encontraron previamente
 							for(int i=0;i<cantidad_redes;i++)
@@ -167,13 +172,11 @@ void seleccionarRedWifi(int cantidad_redes)
 							client.print(" <input type=\"submit\" name=\"Formulario wifi\" value=\"conectar\">");
 							client.print("</select></form>");
 						}
-						else{	//---------------------->Si SI estamos conectados mostramos en que red y un boton para desconectarnos de esa red FALTA IMPLEMENTAR<--------
-							String nombre= conexion.SSIDEEPROM;
-							Serial.print("AHORA ES CUANDO SALE EL NOMBRE:");
-							Serial.println(nombre);
-							Serial.println(conexion.SSIDEEPROM);
+						else{	//-->Si SI estamos conectados mostramos en que red y un boton para desconectarnos de esa red FALTA IMPLEMENTAR<--------
+							// String nombre= conexion.SSIDEEPROM;
+							String nombre = leer(0);
 							client.print("<body><h1>Conectado a:</h1>" );
-							client.print("</b><h1> "+ nombre+"</h1>");
+							client.print("</b><h1> "+ nombre +"</h1>");
 							client.print("<form>");
 							client.print(" <input type=\"submit\" name=\"botondesconectar\" value=\"Desconectar\">");
 							client.print("</form>");
@@ -347,7 +350,7 @@ void desconectarWifi()
 	conexion.SSIDEEPROM="";
 }
 
-/* === Funciones de EEPROM === */
+/* ============ Funciones de EEPROM ============ */
 
 /**
  *  Se recuperan en la estructura global los valores de SSID y PW guardados
