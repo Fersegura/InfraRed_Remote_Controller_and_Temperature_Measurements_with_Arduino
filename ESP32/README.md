@@ -11,4 +11,4 @@ First the user has to connect to the WiFi network (SSID and PW are user-configur
 
 In the loop, it keeps scanning for available networks if the usser disconnects the device from the previous configured WiFi network. To do this he has to enter the local network as before and click the disconnect button from the webpage.
 
-The device also saves the SSID and PW of the latest network in the EEPROM (actually is NVS memory, not EEPROM) and will try to connect to that network first.
+The device also saves the SSID and PW of the latest network connected in the FLASH memory and will try to connect to that network first.
