@@ -1,18 +1,22 @@
 /*
-  Rui Santos
-  Complete project details at https://RandomNerdTutorials.com/esp32-i2c-communication-arduino-ide/
-  
-  Permission is hereby granted, free of charge, to any person obtaining a copy
-  of this software and associated documentation files.
-  
-  The above copyright notice and this permission notice shall be included in all
-  copies or substantial portions of the Software.
+	Video interesante sobre el sensor: https://www.youtube.com/watch?v=O8FgrHR2laM
+	El video habla sobre como programar el uC interno del BMP280 para usarlo en deep-sleep
+	y como cambiar el numero de direccion I2C del dispositivo.
+
+	Este codigo utiliza el sensor BMP280 (podria ser cualquiera de esa familia ej. BME280)
+	con la libreria de Adafruit y el bus I2C para conectarlo.
+	Ejemplo rapido de las funciones de leer temperatura, presion y altura. La altura aparece 
+	referida al nivel del mar y al nivel de donde se inicializo el dispositivo.
+
+	Tambien se agrega la funcion de deep-sleep para reducir el consumo del sensor cuando no
+	esta siendo utilizado, pero falta medir si anda efectivamente.
 */
 
 #include <Arduino.h>
 #include <Wire.h>				// incluye libreria de bus I2C
 #include <Adafruit_BMP280.h>
 
+#define DIRECCION_BMP (uint8_t) 0x76
 #define PRESION_NIVEL_MAR_HP (1013.25)	/* Para altura relativa al mar */
 float  PRESION_REALATIVA_HP=0;	/* Para medir altura relativa al punto de inicio*/
 
@@ -24,13 +28,13 @@ void setup()
 {
 	Serial.begin(115200);			
 	Serial.println("Iniciando:");	
-	if ( !bmp.begin(0x76) ) 
+	if ( !bmp.begin(DIRECCION_BMP) ) 
 	{	// si falla la comunicacion con el sensor mostrar texto y detener flujo del programa
 		Serial.println("BMP280 no encontrado !");	
 		while (1);
 	}
 	PRESION_REALATIVA_HP = bmp.readPressure()/100;	// almacena en la variable el valor actual de presion en HP
-
+	
 }										
 
 void loop() 
@@ -43,19 +47,19 @@ void loop()
 										
 	Serial.print("Temperatura: ");		
 	Serial.print(temp);					
-	Serial.print(" C ");				
+	Serial.println(" [°C] ");				
 
 	Serial.print("Presion: ");		
 	Serial.print(presion);				
-	Serial.println(" hPa");			
+	Serial.println(" [hPa]");			
 
 	Serial.print("Altitud relativa al punto de inicializacion: ");	
 	Serial.print(bmp.readAltitude(PRESION_REALATIVA_HP));	
-	Serial.println(" m");
+	Serial.println(" [m] ");
 
 	Serial.print("Altitud relativa al mar: ");	
 	Serial.print(bmp.readAltitude(PRESION_NIVEL_MAR_HP));	
-	Serial.println(" m");			
+	Serial.println(" [m] ");			
 
 	Serial.println(" ======================= ");
 	Serial.println();
