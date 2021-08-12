@@ -22,6 +22,8 @@
 
 Adafruit_BMP280 bmp;	// crea objeto con nombre bmp
 
+#define PRESION_NIVEL_MAR_HP (1013.25)	/* Para altura relativa al mar */
+
 float TEMPERATURA;		// variable para almacenar valor de temperatura
 float PRESION, P0;		// variables para almacenar valor de presion atmosferica
 				        // y presion actual como referencia para altitud
@@ -40,6 +42,8 @@ void setup()
 
 void loop() 
 {
+	Serial.println();
+	Serial.println(" ======================= ");
 	TEMPERATURA = bmp.readTemperature();	// almacena en variable el valor de temperatura
 	PRESION = bmp.readPressure()/100;		// almacena en variable el valor de presion divido
 										// por 100 para covertirlo a hectopascales
@@ -54,6 +58,13 @@ void loop()
 	Serial.print("Altitud aprox: ");		// muestra texto
 	Serial.print(bmp.readAltitude(P0));	// muestra valor de altitud con referencia a P0
 	Serial.println(" m");					// muestra letra m indicando metros
+	
+	Serial.print("Altitud relativa al mar: ");	
+	Serial.print(bmp.readAltitude(PRESION_NIVEL_MAR_HP));	
+	Serial.println(" m");			
+
+	Serial.println(" ======================= ");
+	Serial.println();
 
 	delay(5000);							// demora de 5 segundos entre lecturas
 }
