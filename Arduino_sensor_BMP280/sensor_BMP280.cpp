@@ -28,6 +28,8 @@ float TEMPERATURA;		// variable para almacenar valor de temperatura
 float PRESION, P0;		// variables para almacenar valor de presion atmosferica
 				        // y presion actual como referencia para altitud
 
+void BMP280_sleep(int);
+
 void setup() 
 {
 	Serial.begin(115200);			// inicializa comunicacion serie a 9600 bps
@@ -67,4 +69,20 @@ void loop()
 	Serial.println();
 
 	delay(5000);							// demora de 5 segundos entre lecturas
+}
+
+void BMP280_sleep(int device_address)
+{
+	/*	BME280 Register 0xF4 (control measurement register) sets the device mode, specifically bits 1,0
+		The bit positions are called 'mode[1:0]'. See datasheet Table 25 and Paragraph 3.3 for more detail.
+		Mode[1:0]  Mode
+		  00      'Sleep'  mode
+		01 / 10   'Forced' mode, use either '01' or '10'
+		  11      'Normal' mode
+	*/
+	Serial.println("Poniendo el sensor BMP280 en sleep...");
+	Wire.beginTransmission(device_address);
+	Wire.write((uint8_t)BMP280_REGISTER_CONTROL);       // Select Control Measurement Register
+	Wire.write((uint8_t)0b00000000); 	// Send '00' for Sleep mode
+	Wire.endTransmission();
 }
