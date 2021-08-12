@@ -18,6 +18,8 @@ float  PRESION_REALATIVA_HP=0;	/* Para medir altura relativa al punto de inicio*
 
 Adafruit_BMP280 bmp;	// crea objeto con nombre bmp
 
+void BMP280_sleep(int);
+
 void setup() 
 {
 	Serial.begin(115200);			
@@ -60,4 +62,20 @@ void loop()
 
 
 	delay(1000);						
+}
+
+void BMP280_sleep(int device_address)
+{
+	/*	BME280 Register 0xF4 (control measurement register) sets the device mode, specifically bits 1,0
+		The bit positions are called 'mode[1:0]'. See datasheet Table 25 and Paragraph 3.3 for more detail.
+		Mode[1:0]  Mode
+		  00      'Sleep'  mode
+		01 / 10   'Forced' mode, use either '01' or '10'
+		  11      'Normal' mode
+	*/
+	Serial.println("Poniendo el sensor BMP280 en sleep...");
+	Wire.beginTransmission(device_address);
+	Wire.write((uint8_t)BMP280_REGISTER_CONTROL);       // Select Control Measurement Register
+	Wire.write((uint8_t)0b00000000); 	// Send '00' for Sleep mode
+	Wire.endTransmission();
 }
