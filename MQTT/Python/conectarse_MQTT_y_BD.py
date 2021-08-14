@@ -1,4 +1,29 @@
-# Este archivo es de la ultima version del python usado en la tesis
+"""
+    Este archivo es el script python que hace de intermediario en el broker.
+    Gestiona la información que va llegando al broker.
+    Con un broker de mejor calidad quizás se pueden establecer estas reglas 
+    en el broker directamente.
+    
+    Descripcion detallada del funcionamiento:
+        El programa esta pensado para correr de manera constante y permanente
+    (idealmente en alguna PC servidor). Lo primero que hace cuando inicia es 
+    conectarse a la base de datos (BD). Luego se configura el cliente MQTT que
+    se suscribe al broker y se setean las funciones de callback las cuales se 
+    ejecutaran de acuerdo al topico correspondiente. El script actua como una
+    sombra del broker, escuchando lo mismo que escucha el broker. La diferencia
+    con el broker es que el script tambien publica en algunos topicos (el 
+    broker hace de intermediario unicamente). En este caso, el broker es un
+    servicio que presta la infraestructura para establecer la conexion entre los
+    distintos dispositivos, pero de manera pasiva (luego no hace nada mas).
+        En las funciones de callback lo primero que se hace es parsear el 
+    mensaje recibido, para filtrar la informacion (publicador, suscriptor 
+    destino, datos, etc.). Luego (en funcion del topico que sea), se guarda la 
+    informacion en la BD o se publica en otro topico o se manda un mail (o se)
+    hacen mas de una de estas acciones en simultaneo.
+        Hay una funcion llamada ignorar que ignora los mensajes publicados por
+    por el propio python, para no sobrecargarlo.
+
+"""
 import paho.mqtt.client as mqtt
 import sys
 import pymysql.cursors
@@ -15,9 +40,9 @@ from email.utils import formataddr
 def conectarse_bd():                                        #ver de agregar mas de una base de datos con distintos nombres ej connection_remote connection_freedb etc
     try:
         connection = pymysql.connect(host='remotemysql.com',
-                                user='C4gd1lgeA2',
-                                password='mUngxZTVJj',
-                                database='C4gd1lgeA2',
+                                user='K8TGpd47dk',
+                                password='248roQwh7H',
+                                database='K8TGpd47dk',
                                 charset='utf8mb4',
                                 cursorclass=pymysql.cursors.DictCursor)
         print("Si se pudo conectar a la base de datos...")
@@ -28,7 +53,7 @@ def conectarse_bd():                                        #ver de agregar mas 
         sys.exit()
 
 """
-    Funcion de callback a la que se llama cuando el cliente recibe un CONNACK desde el broker.   --------->Esto no deberia ser se conecta al Broker y se suscribe a todos los topicos???<----------
+    Funcion de callback a la que se llama cuando el cliente recibe un CONNACK desde el broker.
     @param: client= objeto cliente MQTT
     @param: userdata
     @param: flags
@@ -36,6 +61,8 @@ def conectarse_bd():                                        #ver de agregar mas 
 """
 def on_connect(client, userdata, flags, rc):                
     print("Conectado - Codigo de resultado: "+str(rc))
+    client.publish(topic="KMb6809yr8FThW1/python", payload="Se conecto el script de python", qos=0, retain=False)
+
     # Esto se hace por si se pierde conexion en algun momento, se renueven las suscripciones que habia
     client.subscribe("KMb6809yr8FThW1/#")
     client.message_callback_add(sub="KMb6809yr8FThW1/python/#", callback=ignorar)
@@ -68,7 +95,7 @@ def on_message(client, userdata, msg):
 def conectarse_mqtt():
     client = mqtt.Client() # REVISAR LOS DISTINTOS ARGUMENTOS QUE PUEDE RECIBIR
     # Asignamos los callbacks para los distintos casos y topicos
-    client.on_connect = on_connect    #necesito una explicacion de esta parte
+    client.on_connect = on_connect    
     client.on_message = on_message
     client.message_callback_add(sub="KMb6809yr8FThW1/python/#", callback=ignorar)
     client.message_callback_add(sub="KMb6809yr8FThW1/+/BD/temyhum", callback=temyhum)
@@ -98,9 +125,14 @@ def temyhum(client, userdata, msg):
     mensaje = mensaje.split("/")
     temp, hum = mensaje[0], mensaje[1]
     tiempo_actual_unix = str(int(time.time()))  # Se castea primero a int para sacar lo de punto flotante y luego a str para concatenar en el sql
-    
-    sql = "INSERT INTO `datos`(`id`, `fecha`, `serial`, `temperatura`, `humedad`) VALUES (NULL,'" + tiempo_actual_unix + "','" + origen + "', '" + temp + "','" + hum + "')" # COMPLETAR CON SQL VALIDO
-    
+
+    # COMPLETAR CON SQL VALIDO
+    sql = "INSERT INTO `datos`(`id`, `fecha`, `serial`, `temperatura`, `humedad`) VALUES (NULL,'" + tiempo_actual_unix + "','" + origen + "', '" + temp + "','" + hum + "')" 
+
+    # Se reconecta a la BD. Para evitar el error de 'pymysql.err.InterfaceError: (0, '')' que supuestamente se relaciona
+    # a que se perdio la conexion con la BD debido a un timeout
+    connection.ping()
+
     with connection.cursor() as cursor:        
         try:
             cursor.execute(sql,)
@@ -132,6 +164,10 @@ def actualizarbotones(client, userdata, msg):
         sql = "UPDATE `ESPtable2` SET `RECEIVED_BOOL1`='" + boton1 + "',`RECEIVED_BOOL2`='" + boton2 + "',`RECEIVED_BOOL3`='" + boton3 + "',`RECEIVED_BOOL4`='" + boton4 + "' WHERE `id`='" + origen + "'"
     # =============================
 
+    # Se reconecta a la BD. Para evitar el error de 'pymysql.err.InterfaceError: (0, '')' que supuestamente se relaciona
+    # a que se perdio la conexion con la BD debido a un timeout
+    connection.ping()
+
     with connection.cursor() as cursor:        
         try:
             cursor.execute(sql,)
@@ -154,8 +190,11 @@ def consultabotones(client, userdata, msg):
     else:
         destino =topico[1]  # Desde le PHP se deberia publicar a un topico roon/web/consultabotones/99999  ----->capaz no publicar desde el php solo hacer la consulta y publicar desdel el python
 
-                            
     sql = "SELECT `RECEIVED_BOOL1`, `RECEIVED_BOOL2`, `RECEIVED_BOOL3`, `RECEIVED_BOOL4` FROM `ESPtable2` WHERE `id`='" + destino + "'"             
+
+    # Se reconecta a la BD. Para evitar el error de 'pymysql.err.InterfaceError: (0, '')' que supuestamente se relaciona
+    # a que se perdio la conexion con la BD debido a un timeout
+    connection.ping()
 
     with connection.cursor() as cursor:
         cursor.execute(sql,  )
@@ -184,6 +223,10 @@ def trigger_alarma(client, userdata, msg):
     valor  = payload.split("/")[1]
 
     sql = "SELECT `id_usuario` FROM `ESPtable2` WHERE `id`='" + origen + "'"    # Busco al dueño de la placa     
+
+    # Se reconecta a la BD. Para evitar el error de 'pymysql.err.InterfaceError: (0, '')' que supuestamente se relaciona
+    # a que se perdio la conexion con la BD debido a un timeout
+    connection.ping()
 
     with connection.cursor() as cursor:
         cursor.execute(sql,  )
@@ -255,12 +298,16 @@ def trigger_alarma(client, userdata, msg):
 """
     Funcion de callback para el topico de set_limites. 
     El PHP es el publicador a este tópico.
-    Se buscan los limites y se los publica en el topico al cual está suscripto el ESP8266
+    Se buscan los limites y se los publica en el topico al cual está suscripto el ESP
 """
 def set_limites(client, userdata, msg):
     destino = msg.payload.decode("utf-8")   # El serial_id de la placa viene en el payload
 
     sql = "SELECT  `RECEIVED_NUM1`, `RECEIVED_NUM2`, `RECEIVED_NUM3`, `RECEIVED_NUM4` FROM `ESPtable2` WHERE `id`='" + destino + "'"        
+
+    # Se reconecta a la BD. Para evitar el error de 'pymysql.err.InterfaceError: (0, '')' que supuestamente se relaciona
+    # a que se perdio la conexion con la BD debido a un timeout
+    connection.ping()
 
     with connection.cursor() as cursor:
         cursor.execute(sql,  )
