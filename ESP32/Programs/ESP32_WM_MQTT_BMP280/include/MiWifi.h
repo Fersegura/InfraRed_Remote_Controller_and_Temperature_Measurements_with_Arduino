@@ -1,5 +1,4 @@
 #include "MiConfig.h"
-#include <WiFiManager.h>	// https://github.com/tzapu/WiFiManager
 
 /* === Variables wifi === */
 #define WIFI_DISCONNECT_GPIO (uint8_t) 13	/* Pin del boton de desconexion de WiFi */
@@ -24,10 +23,13 @@ void configWifi()
 
 
 	wm.setConfigPortalBlocking(false);	/* Trabaja en modo no bloqueante */
-
-	/* Esta funcion si no se conecta automaticamente, crea un AP */
+	wm.setWiFiAutoReconnect(true);		/* Para que se reconecte si se corta el wifi externamente */
+	wm.setEnableConfigPortal(false);	/* Para que el autoconnect no inicie el AP si falla la conexion */
+										/* Basicamente el AP solo se crearia de forma manual en el configWifi()*/
+	
+	/* Esta funcion si no se conecta automaticamente, crea un AP, excepto que se haya usado wm.setEnableConfigPortal(false); */
 	if(wm.autoConnect(ssid, pass) && __DEBUGG){
-		Serial.println("Conectada al wifi...");
+		Serial.println("Conectada a la red: " + wm.getWiFiSSID(true));
 	}
 	else {
 		if(__DEBUGG)
@@ -36,6 +38,7 @@ void configWifi()
 		/* Se  configura la pagina del AP */
 		wm.setTitle("RSA - IOT");
 		wm.setDarkMode(true);
+		wm.startConfigPortal(ssid, pass);
 	}
 }
 
@@ -44,7 +47,7 @@ void configWifi()
 */
 void desconectarWifi()
 {
-	if(WiFi.isConnected() || !desconectarse)
+	if(WiFi.isConnected())
 	{	
 		if(__DEBUGG)
 		{
@@ -61,4 +64,35 @@ void desconectarWifi()
 
 }
 
+/**
+ * Funcion que revisa si hay informacion de una red guardada y se intenta reconectar
+*/
+void reconnectWifi()
+{	
+	if(wm.getWiFiIsSaved())
+		wm.autoConnect();	/* Se intenta conectar nuevamente al WiFi guardado si no hay internet */
+
+	if(__DEBUGG)
+		Serial.println("intentando reconectarse a: " + wm.getWiFiSSID(true));	
+}
+
+/**
+ * Funcion que desconecta del wifi y elimina las credenciales si se presiono
+ * el boton de desconexion.
+*/
+void checkDisconnect()
+{
+	/* Por unica vez se hace la desconexion del wifi y del broker y se inicia el modo AP */
+	if(desconectarse)
+	{
+		// clientMQTT.disconnect();	
+		WiFi.disconnect();
+		wm.disconnect();
+		/* Elimina las credenciales para que no se conecte a la misma red. 
+		   Esto se hace SOLO en el caso que la desconexion sea voluntaria. */
+		wm.resetSettings();	
+		configWifi();
+		desconectarse = false;
+	}
+}
 

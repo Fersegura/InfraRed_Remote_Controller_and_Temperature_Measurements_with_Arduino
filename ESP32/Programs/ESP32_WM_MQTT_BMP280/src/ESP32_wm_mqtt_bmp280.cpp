@@ -29,6 +29,8 @@
 		IDEA: Agregar que en el access point el usuario pueda ingresar los 
 		topicos o los parametros del broker propio.
 
+		IDEA:
+
 		Agregar alarmas para valores determinados????
 
 		Agregar botones????  actuadores????
@@ -51,7 +53,6 @@
 #include "MiConfig.h"	/* Variables globales de configuracion y se incluye la libreria Arduino.h*/
 #include "MiWifi.h"
 #include "MiMQTT.h"
-#include <Wire.h>			
 #include <Adafruit_BMP280.h>
 
 
@@ -76,8 +77,10 @@ void setup(){
 	configPines();
 	configSensores();
 	configWifi();
-
-	/* === Configuración de conexion a broker MQTT === */
+	
+	/*
+	* Configuración de conexion a broker MQTT
+	*/
 	clientMQTT.setServer(mqtt_server, PORT);
   	clientMQTT.setCallback(callback);
 }
@@ -85,8 +88,8 @@ void setup(){
 void loop() {
 	
 	/* Se toman mediciones */
-	float temp = bmp280.readTemperature();	
-	float presion = bmp280.readPressure()/100;	
+	String temp = String(bmp280.readTemperature(), 3);	
+	String presion = String(bmp280.readPressure()/100, 3);	
 
 	if(WiFi.isConnected())
 	{	
@@ -107,41 +110,21 @@ void loop() {
 			Serial.println(" [°C] ");				
 			Serial.print("Presion: ");		
 			Serial.print(presion);				
-			Serial.println(" [hPa]");	
+			Serial.println(" [hPa]");
+			delay(1000);	/* Para no llenar el broker ni la BD de mensajes */
 		}
 	}
 	else
 	{
-		/* ------ TESTEAR ------ */
-		/* Probar si funciona el autoconnect 
-		   simulando que se corta la señal de wifi
-		   para ver si se puede reconectar con las
-		   credenciales que ya estaban guardadas
-		   
-		   HAY PROBLEMA CUANDO SE CORTA EL WIFI
-		   Si se corta el WiFi por X razon, el condicional
-		   de la interrupcion de desconectarse deja de
-		   funcionar y no se puede olvidar la configuracion
-		   del WiFi sin hacer un reset del uC...
-		   Para arreglarlo se puede quitar el chekeo de 
-		   validacion si esta conectado o buscarle otra
-		   vuelta al asunto.
-		   -> IDEA: chekear la bandera de desconectarse 
-		   if(!desconectarse)... Asi te podes dar cuenta 
-		   si me estoy desconectando por primera vez.
-		   (es casi lo mismo que no poner condicion 
-		   en realidad...)
-		   */
-
-		wm.process();	/* Se procesa la informacion del webserver*/
-
 		/* ------ COMPLETAR ------ */
 		/*Completar con algoritmo de 
-		  guardar en memoria EEPROM el 
-		  valor sensado hasta que haya conexion
+		guardar en memoria EEPROM el 
+		valor sensado hasta que haya conexion
 		*/
 
-
+		wm.process();	/* Se procesa la informacion del AP */
+		reconnectWifi();
+		
 		/* Señalizacion visual de que no hay internet, quizas deshabilitar esta opcion para mejorar consumo */
 		delay(100);
 		digitalWrite(LED_BUILTIN, HIGH);
@@ -149,18 +132,7 @@ void loop() {
 		digitalWrite(LED_BUILTIN, LOW);
 	}
 
-	/* Por unica vez se hace la desconexion del wifi y del broker y se inicia el modo AP */
-	if(desconectarse)
-	{
-		clientMQTT.disconnect();
-		WiFi.disconnect();
-		wm.disconnect();
-		/* Elimina las credenciales para que no se conecte a la misma red. 
-		   Esto se hace SOLO en el caso que la desconexion sea voluntaria. */
-		wm.resetSettings();	
-		configWifi();
-		desconectarse = false;
-	}
+	checkDisconnect();
 }
 
 /**
@@ -186,7 +158,7 @@ void configSensores()
 	if ( !bmp280.begin(DIRECCION_BMP280) ) 
 	{	// si falla la comunicacion con el sensor mostrar texto y detener flujo del programa
 		Serial.println("BMP280 no encontrado !");	
-		while (1);
+		while(1);
 	}
 
 	PRESION_REALATIVA_HP = bmp280.readPressure()/100;	// almacena en la variable el valor actual de presion en HP

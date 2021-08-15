@@ -1,5 +1,4 @@
 #include "MiConfig.h"
-#include <PubSubClient.h>
 
 /* === Parámetros de configuracion y topicos del broker MQTT === */
 #define MSG_BUFFER_SIZE	(50)
@@ -14,10 +13,10 @@ const char *topico_pub_alarma = "KMb6809yr8FThW1/88888/python/trigger_alarma";		
 const char *topico_sub_botones = "KMb6809yr8FThW1/python/88888/consultabotones";	 	// Nos subcribimos a todas las fuentes que muestren el estado de los reles
 const char *topico_sub_limites = "KMb6809yr8FThW1/python/88888/get_limites";
 
+char msg[MSG_BUFFER_SIZE];
+/* ==== Variables globales MQTT === */
 WiFiClient clientWiFi;
 PubSubClient clientMQTT(clientWiFi);	//GLOBAL???? /* Se crea una instancia del cliente MQTT */
-char msg[MSG_BUFFER_SIZE];
-
 const int ID_SERIAL=88888;	// NO SERIA MEJOR UN DEFINE???? // N° Serial del dispositivo.
 
 /* === Valores recibidos de la pagina web === */
@@ -32,6 +31,7 @@ boolean flag_enviarDatos;
 float temp_max=200, temp_min=-200, hum_max=200, hum_min=-200;    //donde se almacena los valores de temp y hum criticos, por default estan valores inalcanzables
 
 /* ============ Funciones de MQTT ============ */
+
 
 /**
  * Funcion que se llama cuando se publica un mensaje en uno de los topicos a los cuales
@@ -192,18 +192,19 @@ void reconnect()
  * @brief: Se arma el paquete de informacion y se publica en el topico.
  * Por el momento solo acepta dos valores en el campo de datos.
  * @param const char* topico: Topico al cual publicar el mensaje.
- * @param float dato1: dato a publicar (paramentro opcional).
- * @param float dato2: dato a publicar (paramentro opcional).
+ * @param String dato1: dato a publicar (paramentro opcional).
+ * @param String dato2: dato a publicar (paramentro opcional).
  */
-void pubData(const char* topico, float dato1=NULL, float dato2=NULL)
+void pubData(const char* topico, String dato1="", String dato2="")
 {
 	String post_data = "";
 
-	if(dato1 != NULL)
-		post_data += String(dato1);
+	if(dato1 != "")
+		post_data += dato1;
 
-	if(dato2 != NULL)
-		post_data += "+" + String(dato2);
+	/* Se utiliza el '/' como separador para que el Python parsee el mensaje */
+	if(dato2 != "")
+		post_data += "/" + dato2;	
 
 	clientMQTT.publish(topico, post_data.c_str());
 
