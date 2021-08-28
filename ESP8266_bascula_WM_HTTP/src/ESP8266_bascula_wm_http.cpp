@@ -14,7 +14,8 @@
 		En el loop se hace la medicion del peso y en caso de que el usuario presione los
 	botones correspondientes se comienzan a solicitar los datos del recolector (por 
 	teclado o tarjeta RFID) y luego a la transmision de los datos a la BD (o almacenamiento
-	en EEPROM hasta tener conexion y se puedan transmitir).
+	en EEPROM hasta tener conexion y se puedan transmitir). La transmision se hace utilizando
+	protocolo HTTP.
 		En caso de estar conectado a una red WiFi y se desee desconectar, hay un boton
 	fisico para tal proposito, que borra las credenciales ingresadas anteriormente e 
 	inicia el AP para configurar nuevamente el dispositivo. Si se desconecta de forma 
@@ -86,6 +87,7 @@
 			queuetue/Queuetue HX711 Library@^1.0.2
 			adafruit/Adafruit Thermal Printer Library@^1.4.0
 			https://github.com/tzapu/WiFiManager.git
+			arduino-libraries/NTPClient@^3.1.0
 */
 
 #include "MiConfig.h"
@@ -125,34 +127,40 @@ float promedio = 10.0; 			      // Cantidad de muestras que se toman para obtene
 int peso = 0;					      // En gramos
 int tara = 0;
 bool tara_presionado = false;	      // Bandera para saber si se presionó el botón
-uint8_t id_bascula = 1;                // VALOR A MODIFICAR EN CADA DISPOSITIVO.
 
 // Prototipos de funciones:
 
 // ======= Para memoria EEPROM =======
+
 void iniciarEEPROM();
 void grabarMediciones();
 String leerMediciones();
 // ======= Para WiFi =======
+
 void iniciarWiFi();
 void reconnectWifi();
 IRAM_ATTR void desconectarWifi();
 void checkDisconnect();
 // ======= Para hacer la transmision de datos =======
+
 void transmitirDatos();
 void transmitirDatosGuardados();
+
 // ======= Para display LCD =======
 void iniciarLCD();
 // ======= Para teclado y receptor RFID =======
+
 void configPines();				
 void leerTeclado();
 void crearID();
 // ======= Para bascula =======
+
 void iniciarBascula();
 void pesar();
 void ingresarId();
 void ingresarSurco();
 // ======= Para impresora =======
+
 void iniciarImpresora();
 void imprimir();
 
@@ -183,9 +191,7 @@ void setup()
 	// ------- Inicialización impresora -------
 	iniciarImpresora();
 
-	delay(2000);	// Para ver los mensajes por la pantalla antes de limpiar pantalla 
 	lcd.clear();
-
 }
 
 void loop() 
@@ -212,7 +218,6 @@ void loop()
 	leerTeclado();
 	
 	// Impresión de mensajes en pantalla LCD
-	// lcd.clear();
 	lcd.setCursor(0,0);
 	lcd.print("Peso medido: " + String((int)(peso)) + " g");
 	lcd.setCursor(0,1);
@@ -282,14 +287,20 @@ void loop()
 }
 
 // ======= Para WiFi =======
+
+/*
+ * Se inicializa el objeto WiFiManager en modo no bloqueante.
+ * Se intenta conectar de forma automatica con las credenciales que encuentra guardadas.
+ * Si no, inicia en modo AP con una red de nombre y contraseña establecida por referencia.
+*/
 void iniciarWiFi()
 {
 	wm.setDebugOutput(__DEBUGG);	/* Para debugguear */
 
 	WiFi.mode(WIFI_STA); /* Modo de funcionamiento seteado explicitamente. Por defecto STA+AP */     
 
-	if(__DEBUGG)
-		wm.resetSettings();	/* Se resetean las credenciales, solo para debugg, luego las recuerda (EEPROM) */
+	// if(__DEBUGG)
+		// wm.resetSettings();	/* Se resetean las credenciales, solo para debugg, luego las recuerda (EEPROM) */
 
 	wm.setConfigPortalBlocking(false);	/* Trabaja en modo no bloqueante */
 
@@ -297,7 +308,7 @@ void iniciarWiFi()
 	if(wm.autoConnect (SSID, PASS) && __DEBUGG){
 		Serial.println("Conectada al wifi...");
 	}
-	else {
+	else{
 		if(__DEBUGG)
 			Serial.println("Se inicio el portal de configuracion en modo AP");
 		
@@ -308,7 +319,8 @@ void iniciarWiFi()
 }
 
 /**
- * Funcion que revisa si hay informacion de una red guardada y se intenta reconectar
+ * Funcion que revisa si hay informacion de una red guardada y se intenta reconectar. 
+ * FUNCION NO UTILIZADA EN V0.0.3
 */
 void reconnectWifi()
 {	
@@ -333,7 +345,6 @@ void checkDisconnect()
 		wm.disconnect();
 		/* Elimina las credenciales para que no se conecte a la misma red. 
 		   Esto se hace SOLO en el caso que la desconexion sea voluntaria. */
-		delay(50);
 		wm.resetSettings();	
 		iniciarWiFi();
 		desconectarse = false;
@@ -341,11 +352,13 @@ void checkDisconnect()
 }
 
 // ========= Para memoria EEPROM =========
+/**
+ * Se inicializan los 4kB de la memoria y se leen los bytes relacionados a la 
+ * cantidad de datos guardados.
+*/
 void iniciarEEPROM()
 {
 	EEPROM.begin(4096);	// Cantidad total de bytes a usar de la memoria EEPROM (valor maximo es de 4096 Bytes)
-
-	// recuperarEEPROM();	// Se recupera última información guardada
 	
 	uint8_t cant_datos_guardadosH = uint8_t(cant_datos_guardados/256);
 	if(cant_datos_guardadosH == 255)
@@ -360,6 +373,10 @@ void iniciarEEPROM()
 	posicion = 103 + (cant_datos_guardados*TAMANO_DATO);	// Se apunta al byte siguiente al del ultimo dato guardado
 }
 
+/**
+ * Mientras haya lugar en la memoria EEPROM realiza el guardado de datos si no 
+ * hay internet e incrementa las variables de puntero.
+*/
 void grabarMediciones() 
 {  
 	if(cant_datos_guardados == DATOS_MAXIMOS_EEPROM)
@@ -401,14 +418,13 @@ void grabarMediciones()
 	}	
 }
 
+/**
+ * Esta funcion devuelve una cadena que es la que hay que enviar a la BD
+ * una vez que se restituye la conexion a internet.
+ * @return: String "id_trabajador=id&surco=surco&peso=peso" en formato para hacer un HTTP request.
+*/
 String leerMediciones()
 {
-	/*
-		Esta funcion devuelve una cadena que es la que hay que enviar a la BD
-		una vez que se restituye la conexion a internet.
-		@return: un string "id_trabajador=id&surco=surco&peso=peso" en formato para hacer un HTTP request.
-	*/
-
 	if(cant_datos_guardados == 0)
 		return "";	// No hay datos para leer.
 	else
@@ -450,6 +466,10 @@ void iniciarLCD()
 }
 
 // ======= Para configurar pines y sensores =======
+
+/**
+ * Se inicializan los buses y pines necesarios para interrupciones.
+*/
 void configPines()
 {
 	// inicializa bus I2C y teclado
@@ -465,6 +485,11 @@ void configPines()
 	attachInterrupt(digitalPinToInterrupt(WIFI_DISCONNECT_GPIO), desconectarWifi, CHANGE); /* Con high anda, con low no*/
 }
 
+/**
+ * Funcion por pulling. De acuerdo a la tecla presionada se levantan banderas
+ * que son luego revisadas en el programa principal. Hay teclas que hacen que 
+ * se le asignen valores a variables especiales.
+*/
 void leerTeclado()
 {
 	static String ultima_tecla,tecla_cargada;
@@ -479,6 +504,11 @@ void leerTeclado()
 	else
 	{
 		tecla_cargada = tecla_presionada;
+	}
+
+	if(tecla_cargada == "C")
+	{
+		tara_presionado = true;
 	}
 
 	// Si se estan leyendo numeros, se asigna la lectura a 'id'.
@@ -503,7 +533,7 @@ void leerTeclado()
 }
 
 /**
- * Desconectamos el dispositivo.
+ * Interrupcion que levanta bandera para desconectar de WiFi.
 */
 IRAM_ATTR void desconectarWifi()
 {
@@ -536,6 +566,13 @@ void crearID()
 }
 
 // ======= Para bascula =======
+
+/**
+ * Se inicia el sensor HX711 para lo cual se requiere que se posicione sobre la 
+ * balanza una masa de calibracion. Se usa para calcular un desvío de la balanza 
+ * para poder tener maxima precision.
+ * ES UNA FUNCION BLOQUEANTE!!
+*/
 void iniciarBascula()
 {
 	// Procedimiento de tara
@@ -586,8 +623,14 @@ void iniciarBascula()
 	lcd.print("    Calibracion     ");
 	lcd.setCursor(0,1);
 	lcd.print("     Completada     ");
+	delay(1500);	/* Para poder terminar de visualizar los mensajes */
 }
 
+/**
+ * Se toman una serie de muestras (segun variable promedio) y se las promedia
+ * para obtener el valor de la masa sobre la bascula. Si se presiono el boton 
+ * de TARA se hace la operacion de tara.
+*/
 void pesar()
 {
 	// Se toma un promedio del pesaje
@@ -627,6 +670,7 @@ void iniciarImpresora()
 	impresora.setDefault();	/* Reseteo por si habia quedado alguna configuracion indeseada */
 }
 
+/* Se imprime el mensaje del comprobante */
 void imprimir()
 {
 	impresora.online();	/* Activamos la impresora */
@@ -859,6 +903,10 @@ void ingresarSurco()
 
 }
 
+/**
+ * Se transmiten los datos, se hace una serie de intentos y si no se puede
+ * hace la transmision se guarda el dato en memoria.  
+*/
 void transmitirDatos()
 {
 	// Impresion de mensaje por pantalla.
@@ -888,6 +936,9 @@ void transmitirDatos()
 
 		// Se hace el request y se cierra la conexion
 		httpCode = http.POST(postData); 
+		
+		// http.getString().substring(40);	/* Para obtener la fecha del PHP de dbwrite_bascula.php */
+
 		http.end(); 
 
 		if(httpCode == HTTP_CODE_OK)
