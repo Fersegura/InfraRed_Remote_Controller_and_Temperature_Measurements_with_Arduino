@@ -27,7 +27,7 @@ boolean rel3=false;
 boolean rel4=false;
 
 // Es necesario que sea de tipo "ICACHE_RAM_ATTR" la interrupcion para que funcione correctamente
-ICACHE_RAM_ATTR void inter();
+IRAM_ATTR void inter(); 
 
 void setup() 
 {
