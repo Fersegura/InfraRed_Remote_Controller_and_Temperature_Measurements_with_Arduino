@@ -8,7 +8,7 @@
 
 int cont=0;
 
-ICACHE_RAM_ATTR void ISRtimer1();
+IRAM_ATTR void ISRtimer1();
 
 void setup()
 {
